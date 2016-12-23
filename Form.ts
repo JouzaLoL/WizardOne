@@ -32,10 +32,9 @@ class Select implements Form {
      */
     options: [string, string][];
     createElement(): JQuery {
-        var f = $("<form></form>")
-        var e = f.append($("<select></select>"));
+        var e = $("select", {name: "select"}); //TODO: Verify that this works, if not try with <select> and </select>
         this.options.forEach(el => {
-            $("<option>", { value: el[0], text: el[1] }).appendTo(e);
+            $("option", { value: el[0], text: el[1] }).appendTo(e);
         });
         return Wrap(e);
     }
@@ -51,6 +50,7 @@ class Check implements Form {
     title: string;
     text: string;
     createElement(): JQuery {
-        return;
+        var e = $("input", {name: "check", type: "checkbox"});
+        return e;
     }
 }
