@@ -1,33 +1,56 @@
+
+/**
+ * Returns an element wrapped in <form>
+ * 
+ * @param {JQuery} o
+ * @returns {string}
+ */
+function Wrap(o: JQuery): JQuery {
+    return o.wrap("<form></form>");
+}
+
+
 /**
  * Form and its derivates are used to generate HTML code for Steps
- * 
+ *
  * @interface Form
  */
 interface Form {
     title: string;
     text: string;
-    createElement(this: Form): string;
+    createElement(): JQuery;
 }
 
-//TODO: Use native <form> elements to simplify JSON.stringifying
 class Select implements Form {
     title: string;
     text: string;
-    values: string[];
-    createElement(this: Form): string {
-        var e = $("<select></select>");
-        
-        return e;
+    /**
+     * First is value, second is text
+     * 
+     * @type {[string, string][]}
+     * @memberOf Select
+     */
+    options: [string, string][];
+    createElement(): JQuery {
+        var f = $("<form></form>")
+        var e = f.append($("<select></select>"));
+        this.options.forEach(el => {
+            $("<option>", { value: el[0], text: el[1] }).appendTo(e);
+        });
+        return Wrap(e);
     }
-    result: number;
+    constructor(title: string, text: string, options: [string, string][]) {
+        this.title = title;
+        this.text = text;
+        this.options = options;
+    }
 }
 
 class Check implements Form {
     value: boolean;
     title: string;
     text: string;
-    createElement(this: Form): string {
+    createElement(): JQuery {
         return;
     }
-    result: boolean;
 }
