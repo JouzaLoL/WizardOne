@@ -1,27 +1,14 @@
 /**
  * Step:
- * -contains and updates information about individual Step
- * -handles events on self such as State change
- * -parses information from child form
+ * -contains information about individual Step
+ * -generates Step element
+ * -extracts information from its Form
  * @class Step
  */
 class Step {
     id: string;
     state: StepState;
     form: Form;
-    confirm(): boolean {
-        //TODO: Check if this step === StepHandler.CurrentStep
-        try {
-            //Detach the elem but keep the jQuery object, since we might need it later
-            var $step = $('step#' + this.id).detach();
-        } catch (error) {
-            throw new Error("Step not found in DOM");
-        }
-
-        this.state = StepState.Complete;
-
-        return true;
-    };
     createElement(): JQuery {
         var wrapper = $('<step>', { id: this.id});
         return this.form.createElement().wrap(wrapper);

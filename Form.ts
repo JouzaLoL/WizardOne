@@ -11,7 +11,7 @@ function Wrap(o: JQuery): JQuery {
 
 
 /**
- * Form and its derivates are used to generate HTML code for Steps
+ * Form and its derivates are used to generate the Form element
  *
  * @interface Form
  */

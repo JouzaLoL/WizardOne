@@ -1,4 +1,4 @@
-//Global storage of loaded Steps
+//Global permanent storage of loaded Steps
 let Steps: Step[];
 
 /**
@@ -35,16 +35,6 @@ enum LoadMethod {
 }
 
 /**
- * Confirms the Step specified.
- * 
- * @param {string} id The ID of the Step we want to confirm
- * @returns {boolean} Represents failure/success
- */
-function confirmStep(id: string): void {
-    getStep(id).confirm();
-}
-
-/**
  * Returns a Step with the specified ID
  * 
  * @param {string} id 
@@ -52,4 +42,44 @@ function confirmStep(id: string): void {
  */
 function getStep(id: string): Step {
     return Steps.filter((x: Step) => x.id === id)[0];
+}
+
+var StepQueue: Step[];
+
+function registerEvents() {
+    //TODO: Register onStepComplete to the Next button
+    //TODO: Register Reset to the Reset button
+}
+
+function Init() {
+    //TODO: Find the div#wizard and append initialStep (Steps[0])
+    //TODO: Create Next and Reset buttons
+}
+
+function getCurrentStep(): Step {
+    var id = $('step').attr('id');
+    return getStep(id);
+}
+
+/**
+ * An event that fires on Step completion/confirmation.
+ * 
+ */
+function onStepComplete() {
+    var step = getCurrentStep();
+    step.getData(); //TODO: Store the data
+    step.state = StepState.Complete;
+    $('step#' + step.id).remove(); //Remove the Step from the DOM
+
+    StepLogic(step.id);
+    DisplayNextStep();
+}
+
+function StepLogic(currentStepID: string) {
+
+}
+
+
+function DisplayNextStep() {
+
 }
