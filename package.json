@@ -1,0 +1,15 @@
+{
+  "name": "wizardone_men",
+  "version": "1.0.0",
+  "description": "A Mongo/Express/Node implementation of Wizard",
+  "main": "main.js",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jquery": "^2.0.34"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Josef Vacek",
+  "license": "MIT"
+}
