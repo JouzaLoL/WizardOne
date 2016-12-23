@@ -22,6 +22,10 @@ class Step {
 
         return true;
     };
+    createElement(): JQuery {
+        var wrapper = $('<step>', { id: this.id});
+        return this.form.createElement().wrap(wrapper);
+    }
     getElement(): JQuery {
         return $('#' + this.id);
     };
@@ -30,13 +34,13 @@ class Step {
     }
     
     /**
-     * Extract data from the Step
+     * Serializes the form data into a JS object
      * 
-     * @returns {string} JSON object of the Form data
+     * @returns {Object} The JS object containing the form data
      * 
      * @memberOf Step
      */
-    getData(): string {
+    getData(): Object {
         var o = {};
         var a = this.getFormElement().serializeArray();
         $.each(a, function () {
@@ -49,10 +53,14 @@ class Step {
                 o[this.name] = this.value || '';
             }
         });
-        return JSON.stringify(o);
+        return o;
     };
+    constructor(id: string, form: Form, state: StepState = StepState.Queued) {
+        this.id = id;
+        this.form = form;
+        this.state = state;
+    }
 }
-
 /**
  * Represents the state of the Step
  * Queued - Step is waiting in Queue
