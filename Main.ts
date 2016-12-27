@@ -14,16 +14,16 @@ var StepData: Object[];
  * @param {Object} params
  * @returns {boolean}
  */
-function loadSteps(method: LoadMethod = LoadMethod.Hardcoded, params?: any): boolean {
+function loadSteps(method: LoadMethod = LoadMethod.Local, params?: any): boolean {
     //TODO: Verify that IDs are unique (will be done auto on DB side)
     switch (method) {
         case LoadMethod.JSON:
             Steps = JSON.parse(params);
             break;
-        case LoadMethod.DB:
+        case LoadMethod.GET:
             throw new Error("Not implemented yet");
-        case LoadMethod.Hardcoded:
-            console.log('Steps loaded from hardcoded Steps array');
+        case LoadMethod.Local:
+            console.log('Steps loaded from local Steps array');
         default:
             break;
     }
@@ -33,8 +33,8 @@ function loadSteps(method: LoadMethod = LoadMethod.Hardcoded, params?: any): boo
 
 enum LoadMethod {
     JSON,
-    DB,
-    Hardcoded
+    GET,
+    Local
 }
 
 /**
@@ -151,14 +151,15 @@ function StepLogic(currentStepID: string) {
 }
 
 /**
- * A wrapper for the jQuery element creation
+ * A wrapper for the jQuery element creation.
  * Faster and more compatible than pure jQuery
  * @param {string} element
  * @param {Object} attributes
  * @returns {JQuery}
  */
-function c(element: string, attributes: Object): JQuery {
+
+function c(element: string, attributes?: Object): JQuery {
     var e = $(document.createElement(element));
-    e.attr(Object);
+    e.attr(attributes);
     return e;
 }
