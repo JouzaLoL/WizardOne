@@ -1,16 +1,14 @@
 /**
  * Step:
- * -contains information about individual Step
  * -generates Step element
  * -extracts information from its Form
  * @class Step
  */
 class Step {
     id: string;
-    state: StepState;
     form: Form;
     createElement(): JQuery {
-        var wrapper = $('<step>', { id: this.id});
+        var wrapper = c('step', {id: this.id});
         return this.form.createElement().wrap(wrapper);
     }
     getElement(): JQuery {
@@ -42,22 +40,8 @@ class Step {
         });
         return o;
     };
-    constructor(id: string, form: Form, state: StepState = StepState.Queued) {
+    constructor(id: string, form: Form) {
         this.id = id;
         this.form = form;
-        this.state = state;
     }
-}
-/**
- * Represents the state of the Step
- * Queued - Step is waiting in Queue
- * Complete - User has completed this Step
- * Disabled - Step was removed from the Queue due to previous user input
- * 
- * @enum {number}
- */
-enum StepState {
-    Queued,
-    Complete,
-    Disabled
 }
