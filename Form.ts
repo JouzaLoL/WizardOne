@@ -14,15 +14,23 @@ class Select implements Form {
     text: string;
     options: Option[];
     createElement(): JQuery {
-        var $element = c('form');
+        var $element = StepHandler.c('form');
 
-        var $title = c('div', { id: "title" }).text(this.title);
-        var $text = c('div', { id: "text" }).text(this.text);
+        var $title = StepHandler.c('div', {
+            id: "title"
+        }).text(this.title);
+        var $text = StepHandler.c('div', {
+            id: "text"
+        }).text(this.text);
         $element.append($title).append($text);
 
-        var $select = c("select", { name: "select" });
+        var $select = StepHandler.c("select", {
+            name: "select"
+        });
         this.options.forEach(el => {
-            $("option", { value: el.value }).text(el.text).appendTo($select);
+            $("option", {
+                value: el.value
+            }).text(el.text).appendTo($select);
         });
         $element.append($select);
 
@@ -46,13 +54,20 @@ class Check implements Form {
     text: string;
     createElement(): JQuery {
 
-        var $element = c('form');
+        var $element = StepHandler.c('form');
 
-        var $title = c('div', { id: 'title' }).text(this.title);
-        var $text = c('div', { id: 'text' }).text(this.text);
+        var $title = StepHandler.c('div', {
+            id: 'title'
+        }).text(this.title);
+        var $text = StepHandler.c('div', {
+            id: 'text'
+        }).text(this.text);
         $element.append($title).append($text);
 
-        var $check = c('input', { name: 'check', type: 'checkbox' }).prop('checked', this.checked);
+        var $check = StepHandler.c('input', {
+            name: 'check',
+            type: 'checkbox'
+        }).prop('checked', this.checked);
         $element.append($check);
 
         return $element;
