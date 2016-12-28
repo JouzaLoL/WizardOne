@@ -3,7 +3,9 @@
         "module": "es2015",
         "target": "es5",
         "noImplicitAny": false,
-        "sourceMap": false
+        "sourceMap": false,
+        "outDir": "www/",
+        "outFile": "script.js"
     },
     "include": [
         "*"
