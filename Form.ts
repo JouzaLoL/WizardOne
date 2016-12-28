@@ -20,7 +20,7 @@ class Select implements Form {
         var $text = c('div', { id: "text" }).text(this.text);
         $element.append($title).append($text);
 
-        var $select = c("select", { name: "select" }); //TODO: Verify that this works, if not try with <select> and </select>
+        var $select = c("select", { name: "select" });
         this.options.forEach(el => {
             $("option", { value: el.value }).text(el.text).appendTo($select);
         });

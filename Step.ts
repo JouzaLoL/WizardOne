@@ -17,7 +17,6 @@ class Step {
     getFormElement(): JQuery {
         return $('#' + this.id + ' > ' + 'form');
     }
-    
     /**
      * Serializes the form data into a JS object
      * 

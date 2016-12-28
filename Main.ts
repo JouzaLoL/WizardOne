@@ -15,7 +15,6 @@ var StepData: Object[];
  * @returns {boolean}
  */
 function loadSteps(method: LoadMethod = LoadMethod.Local, params?: any): boolean {
-    //TODO: Verify that IDs are unique (will be done auto on DB side)
     switch (method) {
         case LoadMethod.JSON:
             Steps = JSON.parse(params);
@@ -79,11 +78,9 @@ function Init() {
     //Check if initial Step exists, else load it
     if (Steps[0] === null) {
         loadSteps();
-        StepQueue = Steps;
-        //TODO: loadSteps().then(success{queue steps}
-    } else {
-
+        //TODO: loadSteps().then(success{StepQueue = Steps;}
     }
+    StepQueue = Steps;
 
     var $initStep = Steps[0].createElement();
     $wizard.append($initStep);
@@ -94,22 +91,72 @@ function Init() {
     WizardReady = true;
 }
 
-function createButtons(): JQuery {
-    var $reset = c("button", { class: "btn_reset", id: "btn_reset" });
-    var $next = c("button", { class: "btn_next", id: "btn_next" });
 
-    return $reset.append($next);
+/**
+ * Creates the Next and Reset buttons
+ * 
+ * @returns {JQuery}
+ */
+function createButtons(): JQuery {
+    var $reset = c("button", { id: "btn_reset" });
+    var $next = c("button", { id: "btn_next" });
+
+    return $reset.add($next);
 }
 
 function registerEvents() {
-    $('button#btn_next').click(onStepComplete);
+    $('button#btn_next').click(onNextClicked);
     $('button#btn_reset').click(Reset);
 }
 
-function Reset() {
-    //force the reload, clearing the cache to avoid JS problems
-    window.location.reload(true);
-    //TODO: implement a reset without reloading the page
+
+/**
+ * Reset the Wizard, either thru hard page reload or soft JS reset
+ * 
+ * @param {boolean} [hard=false]
+ */
+function Reset(hard: boolean = false) {
+    if (hard) {
+        window.location.reload(true);
+    } else {
+        var $wizard = $('div#wizard');
+
+        //Reset the StepQueue
+        StepQueue = Steps;
+
+        //Reset the whole Wizard
+        $wizard.empty();
+
+        var $initStep = Steps[0].createElement();
+        $wizard.append($initStep);
+
+        $wizard.append(createButtons());
+        registerEvents();
+
+        WizardReady = true;
+
+    }
+}
+
+var ready = false;
+
+function onNextClicked() {
+    var $next = $('button#next');
+
+    //Verify that some data has been entered
+    if (!getCurrentStep().getData()) {
+        //TODO: Display a fancy warning
+        $next.text('Please fill out the form first.')
+        return;
+    }
+
+    if (ready) {
+        $next.text('Next');
+        onStepComplete();
+    } else {
+        $next.text('Confirm');
+        ready = true;
+    }
 }
 
 
@@ -118,7 +165,7 @@ function Reset() {
  * Handles the shifting of the StepQueue, displaying of next Step
  */
 function onStepComplete() {
-    var step = getCurrentStep(); //!: see if JS creates copies of objects or if the original object in the StepsQueue array got changed
+    var step = getCurrentStep();
 
     StepData.push(step.getData());
 
@@ -136,7 +183,7 @@ function onStepComplete() {
 
 /**
  * Handles individual Step logic such as disabling or reordering of Steps in the StepQueue
- * TODO: Make this information contained in a .logic() method in each Step Objects
+ * TODO: Make this information contained in a .logic() method in each Step Object
  * @param {string} currentStepID
  */
 function StepLogic(currentStepID: string) {
