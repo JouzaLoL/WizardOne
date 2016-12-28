@@ -1,7 +1,9 @@
+/// <reference path="Step.ts" />
+import {deserialize} from "serializer.ts/";
 class StepHandler {
-    static Steps: Step[];
-    static StepQueue: Step[];
-    static StepData: Object[];
+    static Steps: Step[] = [];
+    static StepQueue: Step[] = [];
+    static StepData: Object[] = [];
 
     /**
      * Loads the Steps from JSON, DB or from the Hardcoded Steps array
@@ -13,7 +15,7 @@ class StepHandler {
     static loadSteps(method: LoadMethod = LoadMethod.Local, params ? : any): boolean {
         switch (method) {
             case LoadMethod.JSON:
-                StepHandler.Steps = JSON.parse(params);
+            
                 break;
             case LoadMethod.GET:
                 throw new Error("Not implemented yet");

@@ -71,5 +71,33 @@ class Check implements Form {
         $element.append($check);
 
         return $element;
+    };
+    constructor(title: string, text: string, checked: boolean = false) {
+        this.title = title;
+        this.text = text;
+        this.checked = checked;
+    }
+}
+
+class Information implements Form {
+    title: string;
+    text: string;
+    createElement(): JQuery {
+
+        var $element = StepHandler.c('form');
+
+        var $title = StepHandler.c('div', {
+            id: 'title'
+        }).text(this.title);
+        var $text = StepHandler.c('div', {
+            id: 'text'
+        }).text(this.text);
+        $element.append($title).append($text);
+
+        return $element;
+    };
+    constructor(title: string, text: string) {
+        this.title = title;
+        this.text = text;
     }
 }

@@ -1,3 +1,4 @@
+/// <reference path="Form.ts" />
 /**
  * Step:
  * -generates Step element

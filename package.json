@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "A Mongo/Express/Node implementation of Wizard",
   "main": "main.js",
-  "dependencies": {},
+  "dependencies": {
+    "serializer.ts": "0.0.12"
+  },
   "devDependencies": {
     "@types/jquery": "^2.0.34"
   },
