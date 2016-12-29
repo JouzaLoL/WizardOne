@@ -1,4 +1,6 @@
 /// <reference path="Form.ts" />
+/// <reference path="StepHandler.ts" />
+
 /**
  * Step:
  * -generates Step element

@@ -1,3 +1,4 @@
+/// <reference path="StepHandler.ts" />
 /**
  * Form and its derivates are used to generate the Form element
  *

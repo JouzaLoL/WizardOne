@@ -1,5 +1,5 @@
 /// <reference path="Step.ts" />
-import {deserialize} from "serializer.ts/";
+
 class StepHandler {
     static Steps: Step[] = [];
     static StepQueue: Step[] = [];
@@ -12,10 +12,10 @@ class StepHandler {
      * @param {Object} params
      * @returns {boolean}
      */
-    static loadSteps(method: LoadMethod = LoadMethod.Local, params ? : any): boolean {
+    static loadSteps(method: LoadMethod = LoadMethod.Local, params?: any): boolean {
         switch (method) {
             case LoadMethod.JSON:
-            
+
                 break;
             case LoadMethod.GET:
                 throw new Error("Not implemented yet");
@@ -34,7 +34,7 @@ class StepHandler {
      * @param {string} id 
      * @returns {Step} If not found, will return null
      */
-    static getStep(id: string, queue ? : boolean): Step {
+    static getStep(id: string, queue?: boolean): Step {
         if (queue) {
             return StepHandler.StepQueue.filter((x: Step) => x.id === id)[0];
         } else {
@@ -203,9 +203,11 @@ class StepHandler {
      * @returns {JQuery}
      */
 
-    static c(element: string, attributes ? : Object): JQuery {
+    static c(element: string, attributes?: Object): JQuery {
         var e = $(document.createElement(element));
-        e.attr(attributes);
+        if (attributes) {
+            e.attr(attributes);
+        }
         return e;
     }
 

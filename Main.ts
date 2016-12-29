@@ -7,5 +7,6 @@ steps.push(
 steps.push(
     new Step("misc_wifi", 
         new Check("WiFi", "Do you want WiFi in your computer?", true)));
-StepHandler.loadSteps(LoadMethod.JSON, JSON.stringify(steps));
+//StepHandler.loadSteps(LoadMethod.JSON, JSON.stringify(steps));
+StepHandler.Steps = steps;
 $(document).ready(StepHandler.Init);

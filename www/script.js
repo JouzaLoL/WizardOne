@@ -1,91 +1,27 @@
-class Select {
-    createElement() {
-        var $element = StepHandler.c('form');
-        var $title = StepHandler.c('div', {
-            id: "title"
-        }).text(this.title);
-        var $text = StepHandler.c('div', {
-            id: "text"
-        }).text(this.text);
-        $element.append($title).append($text);
-        var $select = StepHandler.c("select", {
-            name: "select"
-        });
-        this.options.forEach(el => {
-            $("option", {
-                value: el.value
-            }).text(el.text).appendTo($select);
-        });
-        $element.append($select);
-        return $element;
-    }
-    constructor(title, text, options) {
-        this.title = title;
-        this.text = text;
-        this.options = options;
-    }
-}
-class Check {
-    createElement() {
-        var $element = StepHandler.c('form');
-        var $title = StepHandler.c('div', {
-            id: 'title'
-        }).text(this.title);
-        var $text = StepHandler.c('div', {
-            id: 'text'
-        }).text(this.text);
-        $element.append($title).append($text);
-        var $check = StepHandler.c('input', {
-            name: 'check',
-            type: 'checkbox'
-        }).prop('checked', this.checked);
-        $element.append($check);
-        return $element;
-    }
-    ;
-    constructor(title, text, checked = false) {
-        this.title = title;
-        this.text = text;
-        this.checked = checked;
-    }
-}
-class Information {
-    createElement() {
-        var $element = StepHandler.c('form');
-        var $title = StepHandler.c('div', {
-            id: 'title'
-        }).text(this.title);
-        var $text = StepHandler.c('div', {
-            id: 'text'
-        }).text(this.text);
-        $element.append($title).append($text);
-        return $element;
-    }
-    ;
-    constructor(title, text) {
-        this.title = title;
-        this.text = text;
-    }
-}
 /// <reference path="Form.ts" />
+/// <reference path="StepHandler.ts" />
 /**
  * Step:
  * -generates Step element
  * -extracts information from its Form
  * @class Step
  */
-class Step {
-    createElement() {
+var Step = (function () {
+    function Step(id, form) {
+        this.id = id;
+        this.form = form;
+    }
+    Step.prototype.createElement = function () {
         var wrapper = StepHandler.c('step', { id: this.id });
         return this.form.createElement().wrap(wrapper);
-    }
-    getElement() {
+    };
+    Step.prototype.getElement = function () {
         return $('#' + this.id);
-    }
+    };
     ;
-    getFormElement() {
+    Step.prototype.getFormElement = function () {
         return $('#' + this.id + ' > ' + 'form');
-    }
+    };
     /**
      * Serializes the form data into a JS object
      *
@@ -93,7 +29,7 @@ class Step {
      *
      * @memberOf Step
      */
-    getData() {
+    Step.prototype.getData = function () {
         var o = {};
         var a = this.getFormElement().serializeArray();
         $.each(a, function () {
@@ -108,15 +44,14 @@ class Step {
             }
         });
         return o;
-    }
+    };
     ;
-    constructor(id, form) {
-        this.id = id;
-        this.form = form;
-    }
-}
+    return Step;
+}());
 /// <reference path="Step.ts" />
-class StepHandler {
+var StepHandler = (function () {
+    function StepHandler() {
+    }
     /**
      * Loads the Steps from JSON, DB or from the Hardcoded Steps array
      * TODO: Make the whole function support promises, because DB and HTTP JSON GET is async
@@ -124,13 +59,10 @@ class StepHandler {
      * @param {Object} params
      * @returns {boolean}
      */
-    static loadSteps(method = LoadMethod.Local, params) {
+    StepHandler.loadSteps = function (method, params) {
+        if (method === void 0) { method = LoadMethod.Local; }
         switch (method) {
             case LoadMethod.JSON:
-                var tempObjects = JSON.parse(params);
-                tempObjects.forEach(element => {
-                    StepHandler.Steps.push(Object.setPrototypeOf(element, Step));
-                });
                 break;
             case LoadMethod.GET:
                 throw new Error("Not implemented yet");
@@ -140,7 +72,7 @@ class StepHandler {
                 break;
         }
         return true;
-    }
+    };
     ;
     /**
      * Return a Step with the specified ID
@@ -148,21 +80,21 @@ class StepHandler {
      * @param {string} id
      * @returns {Step} If not found, will return null
      */
-    static getStep(id, queue) {
+    StepHandler.getStep = function (id, queue) {
         if (queue) {
-            return StepHandler.StepQueue.filter((x) => x.id === id)[0];
+            return StepHandler.StepQueue.filter(function (x) { return x.id === id; })[0];
         }
         else {
-            return StepHandler.Steps.filter((x) => x.id === id)[0];
+            return StepHandler.Steps.filter(function (x) { return x.id === id; })[0];
         }
-    }
+    };
     ;
     /**
      * Get the Step which is currently in the DOM.
      *
      * @returns {Step}
      */
-    static getCurrentStep() {
+    StepHandler.getCurrentStep = function () {
         try {
             var id = $('step').attr('id');
         }
@@ -170,14 +102,14 @@ class StepHandler {
             throw "No Step found in DOM at the moment; " + error;
         }
         return StepHandler.getStep(id, true);
-    }
+    };
     ;
     /**
      * First fn to be called on document.load
      *
      * @description Makes Wizard ready for the user
      */
-    static Init() {
+    StepHandler.Init = function () {
         try {
             var $wizard = $('div#wizard');
         }
@@ -193,14 +125,14 @@ class StepHandler {
         $wizard.append($initStep);
         $wizard.append(StepHandler.createButtons());
         StepHandler.registerEvents();
-    }
+    };
     ;
     /**
      * Creates the Next and Reset buttons
      *
      * @returns {JQuery}
      */
-    static createButtons() {
+    StepHandler.createButtons = function () {
         var $reset = StepHandler.c("button", {
             id: "btn_reset"
         });
@@ -208,7 +140,7 @@ class StepHandler {
             id: "btn_next"
         });
         return $reset.add($next);
-    }
+    };
     ;
     /**
      * Register the events for the page
@@ -216,16 +148,17 @@ class StepHandler {
      *
      * @memberOf StepHandler
      */
-    static registerEvents() {
+    StepHandler.registerEvents = function () {
         $('button#btn_next').click(StepHandler.onNextClicked);
         $('button#btn_reset').click(StepHandler.Reset);
-    }
+    };
     /**
      * Reset the Wizard, either thru hard page reload or soft JS reset
      *
      * @param {boolean} [hard=false]
      */
-    static Reset(hard = false) {
+    StepHandler.Reset = function (hard) {
+        if (hard === void 0) { hard = false; }
         if (hard) {
             window.location.reload(true);
         }
@@ -240,9 +173,9 @@ class StepHandler {
             $wizard.append(StepHandler.createButtons());
             StepHandler.registerEvents();
         }
-    }
+    };
     ;
-    static onNextClicked() {
+    StepHandler.onNextClicked = function () {
         var $next = $('button#next');
         //Verify that some data has been entered
         if (!StepHandler.getCurrentStep().getData()) {
@@ -258,12 +191,12 @@ class StepHandler {
             $next.text('Confirm');
             StepHandler.readyForNext = true;
         }
-    }
+    };
     /**
      * An event that fires on Step completion/confirmation.
      * Handles the shifting of the StepQueue, displaying of next Step
      */
-    static onStepComplete() {
+    StepHandler.onStepComplete = function () {
         var step = StepHandler.getCurrentStep();
         StepHandler.StepData.push(step.getData());
         StepHandler.StepLogic(step.id);
@@ -274,20 +207,20 @@ class StepHandler {
         $currentStep.attr('id', nextStep.id);
         $currentForm.empty();
         $currentForm.append(nextStep.createElement());
-    }
+    };
     /**
      * Handles individual Step logic such as disabling or reordering of Steps in the StepQueue
      * TODO: Make this information contained in a .logic() method in each Step Object
      * @param {string} currentStepID
      */
-    static StepLogic(currentStepID) {
+    StepHandler.StepLogic = function (currentStepID) {
         switch (currentStepID) {
             case "value":
                 break;
             default:
                 break;
         }
-    }
+    };
     /**
      * A wrapper for the jQuery element creation.
      * Faster and more compatible than pure jQuery
@@ -295,12 +228,15 @@ class StepHandler {
      * @param {Object} attributes
      * @returns {JQuery}
      */
-    static c(element, attributes) {
+    StepHandler.c = function (element, attributes) {
         var e = $(document.createElement(element));
-        e.attr(attributes);
+        if (attributes) {
+            e.attr(attributes);
+        }
         return e;
-    }
-}
+    };
+    return StepHandler;
+}());
 StepHandler.Steps = [];
 StepHandler.StepQueue = [];
 StepHandler.StepData = [];
@@ -312,9 +248,84 @@ var LoadMethod;
     LoadMethod[LoadMethod["Local"] = 2] = "Local";
 })(LoadMethod || (LoadMethod = {}));
 /// <reference path="StepHandler.ts" />
+var Select = (function () {
+    function Select(title, text, options) {
+        this.title = title;
+        this.text = text;
+        this.options = options;
+    }
+    Select.prototype.createElement = function () {
+        var $element = StepHandler.c('form');
+        var $title = StepHandler.c('div', {
+            id: "title"
+        }).text(this.title);
+        var $text = StepHandler.c('div', {
+            id: "text"
+        }).text(this.text);
+        $element.append($title).append($text);
+        var $select = StepHandler.c("select", {
+            name: "select"
+        });
+        this.options.forEach(function (el) {
+            $("option", {
+                value: el.value
+            }).text(el.text).appendTo($select);
+        });
+        $element.append($select);
+        return $element;
+    };
+    return Select;
+}());
+var Check = (function () {
+    function Check(title, text, checked) {
+        if (checked === void 0) { checked = false; }
+        this.title = title;
+        this.text = text;
+        this.checked = checked;
+    }
+    Check.prototype.createElement = function () {
+        var $element = StepHandler.c('form');
+        var $title = StepHandler.c('div', {
+            id: 'title'
+        }).text(this.title);
+        var $text = StepHandler.c('div', {
+            id: 'text'
+        }).text(this.text);
+        $element.append($title).append($text);
+        var $check = StepHandler.c('input', {
+            name: 'check',
+            type: 'checkbox'
+        }).prop('checked', this.checked);
+        $element.append($check);
+        return $element;
+    };
+    ;
+    return Check;
+}());
+var Information = (function () {
+    function Information(title, text) {
+        this.title = title;
+        this.text = text;
+    }
+    Information.prototype.createElement = function () {
+        var $element = StepHandler.c('form');
+        var $title = StepHandler.c('div', {
+            id: 'title'
+        }).text(this.title);
+        var $text = StepHandler.c('div', {
+            id: 'text'
+        }).text(this.text);
+        $element.append($title).append($text);
+        return $element;
+    };
+    ;
+    return Information;
+}());
+/// <reference path="StepHandler.ts" />
 //Manually load the steps for now
 var steps = [];
 steps.push(new Step("intro", new Information("Hello", "Hope this displays correctly :)")));
 steps.push(new Step("misc_wifi", new Check("WiFi", "Do you want WiFi in your computer?", true)));
-StepHandler.loadSteps(LoadMethod.JSON, JSON.stringify(steps));
+//StepHandler.loadSteps(LoadMethod.JSON, JSON.stringify(steps));
+StepHandler.Steps = steps;
 $(document).ready(StepHandler.Init);
