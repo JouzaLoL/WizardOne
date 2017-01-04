@@ -78,7 +78,7 @@ class StepHandler {
         var $initStep = StepHandler.Steps[0].createElement();
         $wizard.append($initStep);
 
-        $wizard.append(StepHandler.createButtons());
+        $wizard.append(StepHandler.createNav());
         StepHandler.registerEvents();
     };
 
@@ -87,15 +87,16 @@ class StepHandler {
      * 
      * @returns {JQuery}
      */
-    static createButtons(): JQuery {
+    static createNav(): JQuery {
+        var $nav = StepHandler.c("div", {id: "navigation"});
         var $back = StepHandler.c("button", {
             id: "btn_back"
         }).text("back");
         var $next = StepHandler.c("button", {
             id: "btn_next"
         }).text("Next");
-
-        return $back.add($next);
+        
+        return $nav.append($back).append($next);
     };
 
     /**
@@ -154,7 +155,7 @@ class StepHandler {
             var $initStep = StepHandler.Steps[0].createElement();
             $wizard.append($initStep);
 
-            $wizard.append(StepHandler.createButtons());
+            $wizard.append(StepHandler.createNav());
             StepHandler.registerEvents();
 
 

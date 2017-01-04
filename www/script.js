@@ -124,7 +124,7 @@ var StepHandler = (function () {
         StepHandler.StepQueue = StepHandler.Steps;
         var $initStep = StepHandler.Steps[0].createElement();
         $wizard.append($initStep);
-        $wizard.append(StepHandler.createButtons());
+        $wizard.append(StepHandler.createNav());
         StepHandler.registerEvents();
     };
     ;
@@ -133,14 +133,15 @@ var StepHandler = (function () {
      *
      * @returns {JQuery}
      */
-    StepHandler.createButtons = function () {
-        var $reset = StepHandler.c("button", {
-            id: "btn_reset"
-        }).text("Reset");
+    StepHandler.createNav = function () {
+        var $nav = StepHandler.c("div", { id: "navigation" });
+        var $back = StepHandler.c("button", {
+            id: "btn_back"
+        }).text("back");
         var $next = StepHandler.c("button", {
             id: "btn_next"
         }).text("Next");
-        return $reset.add($next);
+        return $nav.append($back).append($next);
     };
     ;
     /**
@@ -151,7 +152,27 @@ var StepHandler = (function () {
      */
     StepHandler.registerEvents = function () {
         $('button#btn_next').click(StepHandler.onNextClicked);
-        $('button#btn_reset').click(StepHandler.Reset);
+        $('button#btn_back').click(StepHandler.onBackClicked);
+    };
+    /**
+     * Move the user back by one Step
+     *
+     * @static
+     *
+     * @memberOf StepHandler
+     */
+    StepHandler.onBackClicked = function () {
+        var step = StepHandler.getCurrentStep();
+        //remove previous step's data
+        StepHandler.StepData.pop();
+        //Take the last element of the Queue (the previous Step) and put it first
+        StepHandler.StepQueue.unshift(StepHandler.StepQueue.pop());
+        var prevStep = StepHandler.StepQueue[0];
+        var $currentStep = step.getElement();
+        var $currentForm = step.getFormElement();
+        $currentStep.attr('id', prevStep.id);
+        $currentStep.empty();
+        $currentStep.append(prevStep.form.createElement());
     };
     /**
      * Reset the Wizard, either thru hard page reload or soft JS reset
@@ -171,7 +192,7 @@ var StepHandler = (function () {
             $wizard.empty();
             var $initStep = StepHandler.Steps[0].createElement();
             $wizard.append($initStep);
-            $wizard.append(StepHandler.createButtons());
+            $wizard.append(StepHandler.createNav());
             StepHandler.registerEvents();
         }
     };
@@ -201,13 +222,14 @@ var StepHandler = (function () {
         var step = StepHandler.getCurrentStep();
         StepHandler.StepData.push(step.getData());
         StepHandler.StepLogic(step.id);
-        StepHandler.StepQueue.shift(); //Remove the current Step from the Queue, and shift the next to take it's place
+        // Take the first Step and put to the end of the Queue
+        StepHandler.StepQueue.push(StepHandler.StepQueue.shift());
         var nextStep = StepHandler.StepQueue[0];
         var $currentStep = step.getElement();
         var $currentForm = step.getFormElement();
         $currentStep.attr('id', nextStep.id);
-        $currentForm.empty();
-        $currentForm.append(nextStep.createElement());
+        $currentStep.empty();
+        $currentStep.append(nextStep.form.createElement());
     };
     /**
      * Handles individual Step logic such as disabling or reordering of Steps in the StepQueue
@@ -217,6 +239,9 @@ var StepHandler = (function () {
     StepHandler.StepLogic = function (currentStepID) {
         switch (currentStepID) {
             case "value":
+                break;
+            case "finish":
+                //handle Wizard complete
                 break;
             default:
                 break;

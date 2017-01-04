@@ -11,8 +11,13 @@ body { font-family: 'Open Sans', sans-serif; }
 }
 
 step {
-    display: block;
+    display: inline-block;
     margin: 20px;
+}
+
+button {
+    display: inline;
+
 }
 
 .logo {
