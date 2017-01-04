@@ -12,7 +12,7 @@ class StepHandler {
      * @param {Object} params
      * @returns {boolean}
      */
-    static loadSteps(method: LoadMethod = LoadMethod.Local, params?: any): boolean {
+    static loadSteps(method: LoadMethod = LoadMethod.Local, params ? : any): boolean {
         switch (method) {
             case LoadMethod.JSON:
 
@@ -34,7 +34,7 @@ class StepHandler {
      * @param {string} id 
      * @returns {Step} If not found, will return null
      */
-    static getStep(id: string, queue?: boolean): Step {
+    static getStep(id: string, queue ? : boolean): Step {
         if (queue) {
             return StepHandler.StepQueue.filter((x: Step) => x.id === id)[0];
         } else {
@@ -88,14 +88,17 @@ class StepHandler {
      * @returns {JQuery}
      */
     static createNav(): JQuery {
-        var $nav = StepHandler.c("div", {id: "navigation"});
+        var $nav = StepHandler.c("div", {
+            id: "navigation",
+            class: "clearfix"
+        });
         var $back = StepHandler.c("button", {
             id: "btn_back"
-        }).text("back");
+        }).text("< Back");
         var $next = StepHandler.c("button", {
             id: "btn_next"
-        }).text("Next");
-        
+        }).text("Next >");
+
         return $nav.append($back).append($next);
     };
 
@@ -165,7 +168,7 @@ class StepHandler {
     static readyForNext: boolean = false;
 
     static onNextClicked() {
-        var $next = $('button#next');
+        var $next = $('button#btn_next');
 
         //Verify that some data has been entered
         if (!StepHandler.getCurrentStep().getData()) {
@@ -175,10 +178,11 @@ class StepHandler {
         }
 
         if (StepHandler.readyForNext) {
-            $next.text('Next');
+            $next.text('Next >');
+            StepHandler.readyForNext = false;
             StepHandler.onStepComplete();
         } else {
-            $next.text('Confirm');
+            $next.text('Confirm ?');
             StepHandler.readyForNext = true;
         }
     }
@@ -232,7 +236,7 @@ class StepHandler {
      * @returns {JQuery}
      */
 
-    static c(element: string, attributes?: Object): JQuery {
+    static c(element: string, attributes ? : Object): JQuery {
         var e = $(document.createElement(element));
         if (attributes) {
             e.attr(attributes);

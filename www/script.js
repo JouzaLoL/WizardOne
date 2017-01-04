@@ -134,13 +134,16 @@ var StepHandler = (function () {
      * @returns {JQuery}
      */
     StepHandler.createNav = function () {
-        var $nav = StepHandler.c("div", { id: "navigation" });
+        var $nav = StepHandler.c("div", {
+            id: "navigation",
+            class: "clearfix"
+        });
         var $back = StepHandler.c("button", {
             id: "btn_back"
-        }).text("back");
+        }).text("< Back");
         var $next = StepHandler.c("button", {
             id: "btn_next"
-        }).text("Next");
+        }).text("Next >");
         return $nav.append($back).append($next);
     };
     ;
@@ -198,7 +201,7 @@ var StepHandler = (function () {
     };
     ;
     StepHandler.onNextClicked = function () {
-        var $next = $('button#next');
+        var $next = $('button#btn_next');
         //Verify that some data has been entered
         if (!StepHandler.getCurrentStep().getData()) {
             //TODO: Display a fancy warning
@@ -206,11 +209,12 @@ var StepHandler = (function () {
             return;
         }
         if (StepHandler.readyForNext) {
-            $next.text('Next');
+            $next.text('Next >');
+            StepHandler.readyForNext = false;
             StepHandler.onStepComplete();
         }
         else {
-            $next.text('Confirm');
+            $next.text('Confirm ?');
             StepHandler.readyForNext = true;
         }
     };

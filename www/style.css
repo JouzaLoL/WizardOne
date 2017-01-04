@@ -1,24 +1,81 @@
-/* Pallete: http://paletton.com/#uid=33p0u0kiNn68--rdBshntirt4cU */
-
-@import url('https://fonts.googleapis.com/css?family=Open+Sans');
-
-body { font-family: 'Open Sans', sans-serif; }
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans');
+body {
+    font-family: 'Noto Sans', sans-serif;
+}
 
 #wizard {
     margin: 0 auto;
-    width: 560px;
-    border-left: solid 3px #1B4C5C;
+    display: inline-block;
+    /*width: 560px;*/
+    padding: 10px;
+    padding-left: 20px;
+    background-color: #ccf5ff;
+    border-left: solid 5px #0061a7;
 }
 
 step {
     display: inline-block;
-    margin: 20px;
 }
+
+#title {
+    font-size: 20px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+/* #Belize Hole Sea Flat Button
+==================================================*/
 
 button {
     display: inline;
-
+    position: relative;
+    vertical-align: top;
+    padding: 7px 10px;
+    font-size: 18px;
+    color: white;
+    text-align: center;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    background: #2980b9;
+    border: 0;
+    border-bottom: 2px solid #2475ab;
+    cursor: pointer;
+    -webkit-box-shadow: inset 0 -2px #2475ab;
+    box-shadow: inset 0 -2px #2475ab;
 }
+
+button:active {
+    top: 1px;
+    outline: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+#btn_next {
+    float: right;
+}
+
+#btn_back {
+    float: left;
+}
+
+#navigation {
+    margin-top: 20px;
+}
+
+.clearfix::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+
+/* ======================================================================= */
+
+
+/* ========================= OLD WIZARD CSS HERE ========================= */
+
+
+/* ======================================================================= */
 
 .logo {
     font-size: 4em;
@@ -39,7 +96,9 @@ header {
     text-align: center;
 }
 
-#pouziti { text-align: center; }
+#pouziti {
+    text-align: center;
+}
 
 select {
     background: #f8f8f8;
@@ -60,7 +119,7 @@ select {
     text-align: center;
 }
 
-.navigation > * {
+.navigation>* {
     background-color: #537F8D;
     border: solid 5px #537F8D;
     border-radius: 5px;
@@ -70,14 +129,16 @@ select {
     transition: 0.5s;
 }
 
-.navigation > *:hover {
+.navigation>*:hover {
     background-color: #083240;
     border: solid 5px #083240;
     cursor: pointer;
     transition: 0.5s;
 }
 
-next { float: right; }
+next {
+    float: right;
+}
 
 footer {
     color: darkgrey;
@@ -102,14 +163,19 @@ back {
 }
 
 @keyframes opacity {
-    0% { opacity: 0; }
-
-    100% { opacity: 1; }
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 .basic,
 .gaming,
-.workstation { display: none; }
+.workstation {
+    display: none;
+}
 
 .hidden {
     opacity: 0;
@@ -135,7 +201,9 @@ checkbox {
     pointer-events: none;
 }
 
-#dokoncit { text-align: center; }
+#dokoncit {
+    text-align: center;
+}
 
 finish {
     background-color: #537F8D;
@@ -156,7 +224,6 @@ finish:hover {
 
 .result {
     background: lightblue;
-
 }
 
 .result .price {
