@@ -12,7 +12,8 @@ class Step {
     form: Form;
     createElement(): JQuery {
         var wrapper = StepHandler.c('step', {id: this.id});
-        return this.form.createElement().wrap(wrapper);
+        var el = wrapper.append(this.form.createElement());
+        return el;
     }
     getElement(): JQuery {
         return $('#' + this.id);

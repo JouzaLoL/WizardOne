@@ -13,7 +13,8 @@ var Step = (function () {
     }
     Step.prototype.createElement = function () {
         var wrapper = StepHandler.c('step', { id: this.id });
-        return this.form.createElement().wrap(wrapper);
+        var el = wrapper.append(this.form.createElement());
+        return el;
     };
     Step.prototype.getElement = function () {
         return $('#' + this.id);
@@ -135,10 +136,10 @@ var StepHandler = (function () {
     StepHandler.createButtons = function () {
         var $reset = StepHandler.c("button", {
             id: "btn_reset"
-        });
+        }).text("Reset");
         var $next = StepHandler.c("button", {
             id: "btn_next"
-        });
+        }).text("Next");
         return $reset.add($next);
     };
     ;
