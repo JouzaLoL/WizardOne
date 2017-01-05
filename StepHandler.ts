@@ -12,7 +12,7 @@ class StepHandler {
      * @param {Object} params
      * @returns {boolean}
      */
-    static loadSteps(method: LoadMethod = LoadMethod.Local, params ? : any): boolean {
+    static loadSteps(method: LoadMethod = LoadMethod.Local, params?: any): boolean {
         switch (method) {
             case LoadMethod.JSON:
 
@@ -34,7 +34,7 @@ class StepHandler {
      * @param {string} id 
      * @returns {Step} If not found, will return null
      */
-    static getStep(id: string, queue ? : boolean): Step {
+    static getStep(id: string, queue?: boolean): Step {
         if (queue) {
             return StepHandler.StepQueue.filter((x: Step) => x.id === id)[0];
         } else {
@@ -209,6 +209,27 @@ class StepHandler {
         $currentStep.append(nextStep.form.createElement());
     }
 
+    static onFinish() {
+        $('#btn_next').hide(); //we don't want the user to continue
+
+
+    }
+
+    static submitData() {
+        var data = StepHandler.StepData;
+
+        $.ajax({
+            type: "POST",
+            url: "/api/default",
+            data: data,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+        }).then((success) => {
+            //do something
+        }, (failure) => {
+            //we failed, oh noes
+        });
+    }
 
     /**
      * Handles individual Step logic such as disabling or reordering of Steps in the StepQueue
@@ -222,6 +243,7 @@ class StepHandler {
                 break;
             case "finish":
                 //handle Wizard complete
+                StepHandler.onFinish();
                 break;
             default:
                 break;
@@ -236,7 +258,7 @@ class StepHandler {
      * @returns {JQuery}
      */
 
-    static c(element: string, attributes ? : Object): JQuery {
+    static c(element: string, attributes?: Object): JQuery {
         var e = $(document.createElement(element));
         if (attributes) {
             e.attr(attributes);
