@@ -62,23 +62,31 @@ class StepHandler {
      * @description Makes Wizard ready for the user
      */
     static Init() {
+        //Check for the wizard anchor
         try {
             var $wizard = $('div#wizard');
         } catch (error) {
             throw "Wizard anchor div not found: " + error;
         }
 
-        //Check if initial Step exists, else load it
+        //Check if Steps are loaded
         if (StepHandler.Steps[0] === null) {
             StepHandler.loadSteps();
             //TODO: loadSteps().then(success{StepQueue = Steps;}
         }
+        //Populate the StepQueue
         StepHandler.StepQueue = StepHandler.Steps;
 
+        //Initialize the first Step
         var $initStep = StepHandler.Steps[0].createElement();
         $wizard.append($initStep);
 
+        //Create and append the Navigation
         $wizard.append(StepHandler.createNav());
+
+        //Create and append the Progress Bar
+
+        //Register UI events
         StepHandler.registerEvents();
     };
 
@@ -101,6 +109,17 @@ class StepHandler {
 
         return $nav.append($back).append($next);
     };
+
+    /**
+     * Creates the Progress Bar
+     * 
+     * @static
+     * 
+     * @memberOf StepHandler
+     */
+    static createProgressBar() {
+
+    }
 
     /**
      * Register the events for the page
@@ -138,33 +157,6 @@ class StepHandler {
         $currentStep.append(prevStep.form.createElement());
     }
 
-    /**
-     * Reset the Wizard, either thru hard page reload or soft JS reset
-     * 
-     * @param {boolean} [hard=false]
-     */
-    static Reset(hard: boolean = false) {
-        if (hard) {
-            window.location.reload(true);
-        } else {
-            var $wizard = $('div#wizard');
-
-            //Reset the StepQueue
-            StepHandler.StepQueue = StepHandler.Steps;
-
-            //Reset the whole Wizard
-            $wizard.empty();
-
-            var $initStep = StepHandler.Steps[0].createElement();
-            $wizard.append($initStep);
-
-            $wizard.append(StepHandler.createNav());
-            StepHandler.registerEvents();
-
-
-        }
-    };
-
     static readyForNext: boolean = false;
 
     static onNextClicked() {
@@ -189,32 +181,82 @@ class StepHandler {
 
 
     /**
+     * Called when the User moves back or forward in the Wizard
+     * Manages the Progress Bar
+     * 
+     * @static
+     * 
+     * @memberOf StepHandler
+     */
+    static onProgressUpdate() {
+
+    }
+
+    /**
      * An event that fires on Step completion/confirmation.
      * Handles the shifting of the StepQueue, displaying of next Step
      */
     static onStepComplete() {
         var step = StepHandler.getCurrentStep();
 
+        //Extract and store the Step data
         StepHandler.StepData.push(step.getData());
 
+        //Execute Logic corresponding to the Step
         StepHandler.StepLogic(step.id);
+
         // Take the first Step and put to the end of the Queue
         StepHandler.StepQueue.push(StepHandler.StepQueue.shift());
 
+        //Move to next step
         var nextStep = StepHandler.StepQueue[0];
         var $currentStep = step.getElement();
         var $currentForm = step.getFormElement();
         $currentStep.attr('id', nextStep.id);
         $currentStep.empty();
         $currentStep.append(nextStep.form.createElement());
+
+        //Update the Progress Bar
+        StepHandler.onProgressUpdate();
     }
 
+    /**
+     * Handles individual Step logic such as disabling or reordering of Steps in the StepQueue
+     * TODO: Make this information contained in a .logic() method in each Step Object
+     * @param {string} currentStepID
+     */
+    static StepLogic(currentStepID: string) {
+        switch (currentStepID) {
+            case "value":
+
+                break;
+            case "finish": //Wizard is complete
+                StepHandler.onFinish();
+                break;
+            default:
+                break;
+        }
+    }
+    
+    /**
+     * Called when User reaches last Step (step#finish)
+     * 
+     * @static
+     * 
+     * @memberOf StepHandler
+     */
     static onFinish() {
         $('#btn_next').hide(); //we don't want the user to continue
-
-
+        StepHandler.submitData();
     }
-
+    
+    /**
+     * Submits the data to the backend
+     * 
+     * @static
+     * 
+     * @memberOf StepHandler
+     */
     static submitData() {
         var data = StepHandler.StepData;
 
@@ -230,25 +272,37 @@ class StepHandler {
             //we failed, oh noes
         });
     }
-
+    
     /**
-     * Handles individual Step logic such as disabling or reordering of Steps in the StepQueue
-     * TODO: Make this information contained in a .logic() method in each Step Object
-     * @param {string} currentStepID
+     * Reset the Wizard, either thru hard page reload or soft JS reset
+     * 
+     * @param {boolean} [hard=false]
      */
-    static StepLogic(currentStepID: string) {
-        switch (currentStepID) {
-            case "value":
+    static Reset(hard: boolean = false) {
+        if (hard) {
+            window.location.reload(true);
+        } else {
+            var $wizard = $('div#wizard');
 
-                break;
-            case "finish":
-                //handle Wizard complete
-                StepHandler.onFinish();
-                break;
-            default:
-                break;
+            //Reset the StepQueue
+            StepHandler.StepQueue = StepHandler.Steps;
+
+            //Reset the whole Wizard
+            $wizard.empty();
+
+            //Append init Step
+            var $initStep = StepHandler.Steps[0].createElement();
+            $wizard.append($initStep);
+
+            //Create and append Navigation
+            $wizard.append(StepHandler.createNav());
+
+            //Register UI events
+            StepHandler.registerEvents();
+
+            //TODO: Create Progress Bar
         }
-    }
+    };
 
     /**
      * A wrapper for the jQuery element creation.
