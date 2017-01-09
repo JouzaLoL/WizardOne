@@ -84,14 +84,15 @@ class StepHandler {
         //Create and append the Navigation
         $wizard.append(StepHandler.createNav());
 
-        //Create and append the Progress Bar
+        //Create and prepend (append as first child) the Progress Bar
+        $wizard.prepend(StepHandler.createProgressBar());
 
         //Register UI events
         StepHandler.registerEvents();
     };
 
     /**
-     * Creates the Next and Reset buttons
+     * Creates the Next and Reset buttons as jQuery element 
      * 
      * @returns {JQuery}
      */
@@ -109,16 +110,39 @@ class StepHandler {
 
         return $nav.append($back).append($next);
     };
+    
+    /**
+     * Update the Progress Bar according to the current state
+     * 
+     * @static
+     * @param {number} percent
+     * 
+     * @memberOf StepHandler
+     */
+    static updateProgress() {
+        var current_step = StepHandler.getCurrentStep();
+        var percent = ((StepHandler.StepQueue.indexOf(current_step) + 1) / StepHandler.StepQueue.length) * 100;
+        var $progress_bar = $('#progress_bar');
+        $progress_bar.width(percent + "%");
+    }
 
     /**
-     * Creates the Progress Bar
+     * Creates the Progress Bar as jQuery element
      * 
      * @static
      * 
      * @memberOf StepHandler
      */
-    static createProgressBar() {
+    static createProgressBar(): JQuery {
+        var $progress = StepHandler.c('div', {
+            id: "progress"
+        });
 
+        var $progress_bar = StepHandler.c('div', {
+            id: "progress_bar"
+        });
+
+        return $progress.append($progress_bar);
     }
 
     /**
@@ -128,13 +152,30 @@ class StepHandler {
      * @memberOf StepHandler
      */
     static registerEvents() {
-        $('button#btn_next').click(StepHandler.onNextClicked);
-        $('button#btn_back').click(StepHandler.onBackClicked);
+        $('button#btn_next').click(() => {
+            StepHandler.onNextClicked();
+            StepHandler.onStepChange();
+        });
+        $('button#btn_back').click(() => {  
+            StepHandler.onBackClicked();
+            StepHandler.onStepChange();
+        });
     }
 
+    /**
+     * Fires on Step change (Back or Next)
+     * Contains functionality common for all Step changes
+     * @static
+     * 
+     * @memberOf StepHandler
+     */
+    static onStepChange() {
+        StepHandler.updateProgress();
+    }
 
     /**
-     * Move the user back by one Step
+     * Fired when the User clicks the Back button
+     * Moves the User back one Step
      * 
      * @static
      * 
@@ -158,17 +199,27 @@ class StepHandler {
     }
 
     static readyForNext: boolean = false;
-
+    
+    /**
+     * Fired when the User clicks the Next button
+     * 
+     * @static
+     * @returns
+     * 
+     * @memberOf StepHandler
+     */
     static onNextClicked() {
         var $next = $('button#btn_next');
 
-        //Verify that some data has been entered
+        //Verify that data was been entered
         if (!StepHandler.getCurrentStep().getData()) {
             //TODO: Display a fancy warning
             $next.text('Please fill out the form first.')
             return;
         }
 
+
+        //Confirm functionality
         if (StepHandler.readyForNext) {
             $next.text('Next >');
             StepHandler.readyForNext = false;
@@ -177,19 +228,6 @@ class StepHandler {
             $next.text('Confirm ?');
             StepHandler.readyForNext = true;
         }
-    }
-
-
-    /**
-     * Called when the User moves back or forward in the Wizard
-     * Manages the Progress Bar
-     * 
-     * @static
-     * 
-     * @memberOf StepHandler
-     */
-    static onProgressUpdate() {
-
     }
 
     /**
@@ -215,9 +253,6 @@ class StepHandler {
         $currentStep.attr('id', nextStep.id);
         $currentStep.empty();
         $currentStep.append(nextStep.form.createElement());
-
-        //Update the Progress Bar
-        StepHandler.onProgressUpdate();
     }
 
     /**

@@ -29,7 +29,7 @@ class Select implements Form {
             name: "select"
         });
         this.options.forEach(el => {
-            $("option", {
+            StepHandler.c("option", {
                 value: el.value
             }).text(el.text).appendTo($select);
         });

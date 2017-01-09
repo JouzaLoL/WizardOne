@@ -111,25 +111,32 @@ var StepHandler = (function () {
      * @description Makes Wizard ready for the user
      */
     StepHandler.Init = function () {
+        //Check for the wizard anchor
         try {
             var $wizard = $('div#wizard');
         }
         catch (error) {
             throw "Wizard anchor div not found: " + error;
         }
-        //Check if initial Step exists, else load it
+        //Check if Steps are loaded
         if (StepHandler.Steps[0] === null) {
             StepHandler.loadSteps();
         }
+        //Populate the StepQueue
         StepHandler.StepQueue = StepHandler.Steps;
+        //Initialize the first Step
         var $initStep = StepHandler.Steps[0].createElement();
         $wizard.append($initStep);
+        //Create and append the Navigation
         $wizard.append(StepHandler.createNav());
+        //Create and prepend (append as first child) the Progress Bar
+        $wizard.prepend(StepHandler.createProgressBar());
+        //Register UI events
         StepHandler.registerEvents();
     };
     ;
     /**
-     * Creates the Next and Reset buttons
+     * Creates the Next and Reset buttons as jQuery element
      *
      * @returns {JQuery}
      */
@@ -148,17 +155,64 @@ var StepHandler = (function () {
     };
     ;
     /**
+     * Update the Progress Bar according to the current state
+     *
+     * @static
+     * @param {number} percent
+     *
+     * @memberOf StepHandler
+     */
+    StepHandler.updateProgress = function () {
+        var current_step = StepHandler.getCurrentStep();
+        var percent = ((StepHandler.StepQueue.indexOf(current_step) + 1) / StepHandler.StepQueue.length) * 100;
+        var $progress_bar = $('#progress_bar');
+        $progress_bar.width(percent + "%");
+    };
+    /**
+     * Creates the Progress Bar as jQuery element
+     *
+     * @static
+     *
+     * @memberOf StepHandler
+     */
+    StepHandler.createProgressBar = function () {
+        var $progress = StepHandler.c('div', {
+            id: "progress"
+        });
+        var $progress_bar = StepHandler.c('div', {
+            id: "progress_bar"
+        });
+        return $progress.append($progress_bar);
+    };
+    /**
      * Register the events for the page
      *
      *
      * @memberOf StepHandler
      */
     StepHandler.registerEvents = function () {
-        $('button#btn_next').click(StepHandler.onNextClicked);
-        $('button#btn_back').click(StepHandler.onBackClicked);
+        $('button#btn_next').click(function () {
+            StepHandler.onNextClicked();
+            StepHandler.onStepChange();
+        });
+        $('button#btn_back').click(function () {
+            StepHandler.onBackClicked();
+            StepHandler.onStepChange();
+        });
     };
     /**
-     * Move the user back by one Step
+     * Fires on Step change (Back or Next)
+     * Contains functionality common for all Step changes
+     * @static
+     *
+     * @memberOf StepHandler
+     */
+    StepHandler.onStepChange = function () {
+        StepHandler.updateProgress();
+    };
+    /**
+     * Fired when the User clicks the Back button
+     * Moves the User back one Step
      *
      * @static
      *
@@ -178,36 +232,22 @@ var StepHandler = (function () {
         $currentStep.append(prevStep.form.createElement());
     };
     /**
-     * Reset the Wizard, either thru hard page reload or soft JS reset
+     * Fired when the User clicks the Next button
      *
-     * @param {boolean} [hard=false]
+     * @static
+     * @returns
+     *
+     * @memberOf StepHandler
      */
-    StepHandler.Reset = function (hard) {
-        if (hard === void 0) { hard = false; }
-        if (hard) {
-            window.location.reload(true);
-        }
-        else {
-            var $wizard = $('div#wizard');
-            //Reset the StepQueue
-            StepHandler.StepQueue = StepHandler.Steps;
-            //Reset the whole Wizard
-            $wizard.empty();
-            var $initStep = StepHandler.Steps[0].createElement();
-            $wizard.append($initStep);
-            $wizard.append(StepHandler.createNav());
-            StepHandler.registerEvents();
-        }
-    };
-    ;
     StepHandler.onNextClicked = function () {
         var $next = $('button#btn_next');
-        //Verify that some data has been entered
+        //Verify that data was been entered
         if (!StepHandler.getCurrentStep().getData()) {
             //TODO: Display a fancy warning
             $next.text('Please fill out the form first.');
             return;
         }
+        //Confirm functionality
         if (StepHandler.readyForNext) {
             $next.text('Next >');
             StepHandler.readyForNext = false;
@@ -224,10 +264,13 @@ var StepHandler = (function () {
      */
     StepHandler.onStepComplete = function () {
         var step = StepHandler.getCurrentStep();
+        //Extract and store the Step data
         StepHandler.StepData.push(step.getData());
+        //Execute Logic corresponding to the Step
         StepHandler.StepLogic(step.id);
         // Take the first Step and put to the end of the Queue
         StepHandler.StepQueue.push(StepHandler.StepQueue.shift());
+        //Move to next step
         var nextStep = StepHandler.StepQueue[0];
         var $currentStep = step.getElement();
         var $currentForm = step.getFormElement();
@@ -245,12 +288,70 @@ var StepHandler = (function () {
             case "value":
                 break;
             case "finish":
-                //handle Wizard complete
+                StepHandler.onFinish();
                 break;
             default:
                 break;
         }
     };
+    /**
+     * Called when User reaches last Step (step#finish)
+     *
+     * @static
+     *
+     * @memberOf StepHandler
+     */
+    StepHandler.onFinish = function () {
+        $('#btn_next').hide(); //we don't want the user to continue
+        StepHandler.submitData();
+    };
+    /**
+     * Submits the data to the backend
+     *
+     * @static
+     *
+     * @memberOf StepHandler
+     */
+    StepHandler.submitData = function () {
+        var data = StepHandler.StepData;
+        $.ajax({
+            type: "POST",
+            url: "/api/default",
+            data: data,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+        }).then(function (success) {
+            //do something
+        }, function (failure) {
+            //we failed, oh noes
+        });
+    };
+    /**
+     * Reset the Wizard, either thru hard page reload or soft JS reset
+     *
+     * @param {boolean} [hard=false]
+     */
+    StepHandler.Reset = function (hard) {
+        if (hard === void 0) { hard = false; }
+        if (hard) {
+            window.location.reload(true);
+        }
+        else {
+            var $wizard = $('div#wizard');
+            //Reset the StepQueue
+            StepHandler.StepQueue = StepHandler.Steps;
+            //Reset the whole Wizard
+            $wizard.empty();
+            //Append init Step
+            var $initStep = StepHandler.Steps[0].createElement();
+            $wizard.append($initStep);
+            //Create and append Navigation
+            $wizard.append(StepHandler.createNav());
+            //Register UI events
+            StepHandler.registerEvents();
+        }
+    };
+    ;
     /**
      * A wrapper for the jQuery element creation.
      * Faster and more compatible than pure jQuery
@@ -297,7 +398,7 @@ var Select = (function () {
             name: "select"
         });
         this.options.forEach(function (el) {
-            $("option", {
+            StepHandler.c("option", {
                 value: el.value
             }).text(el.text).appendTo($select);
         });
@@ -356,6 +457,10 @@ var Information = (function () {
 var steps = [];
 steps.push(new Step("intro", new Information("Hello", "Hope this displays correctly :)")));
 steps.push(new Step("misc_wifi", new Check("WiFi", "Do you want WiFi in your computer?", true)));
+steps.push(new Step("use", new Select("Use", "What are you going to use the Computer for?", [
+    new Option("Gaming", "gaming"),
+    new Option("Office", "office")
+])));
 //StepHandler.loadSteps(LoadMethod.JSON, JSON.stringify(steps));
 StepHandler.Steps = steps;
 $(document).ready(StepHandler.Init);
