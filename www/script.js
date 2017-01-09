@@ -133,6 +133,8 @@ var StepHandler = (function () {
         $wizard.prepend(StepHandler.createProgressBar());
         //Register UI events
         StepHandler.registerEvents();
+        //Run StepLogic once to hide the Back button on start
+        StepHandler.onStepChange();
     };
     ;
     /**
@@ -193,7 +195,7 @@ var StepHandler = (function () {
     StepHandler.registerEvents = function () {
         $('button#btn_next').click(function () {
             StepHandler.onNextClicked();
-            StepHandler.onStepChange();
+            //onStepChange called in onStepComplete
         });
         $('button#btn_back').click(function () {
             StepHandler.onBackClicked();
@@ -208,7 +210,23 @@ var StepHandler = (function () {
      * @memberOf StepHandler
      */
     StepHandler.onStepChange = function () {
+        //Update the Progress Bar
         StepHandler.updateProgress();
+        //Update currentStepIndex
+        StepHandler.currentStepIndex = StepHandler.StepQueue.indexOf(StepHandler.getCurrentStep());
+        //Hide/show buttons
+        if (StepHandler.getCurrentStep().id == "start") {
+            $('#btn_back').hide();
+        }
+        else {
+            $('#btn_back').show();
+        }
+        if (StepHandler.getCurrentStep().id == "finish") {
+            $('#btn_next').hide();
+        }
+        else {
+            $('#btn_next').show();
+        }
     };
     /**
      * Fired when the User clicks the Back button
@@ -220,11 +238,10 @@ var StepHandler = (function () {
      */
     StepHandler.onBackClicked = function () {
         var step = StepHandler.getCurrentStep();
-        //remove previous step's data
+        //remove previous Step's data from StepData
         StepHandler.StepData.pop();
-        //Take the last element of the Queue (the previous Step) and put it first
-        StepHandler.StepQueue.unshift(StepHandler.StepQueue.pop());
-        var prevStep = StepHandler.StepQueue[0];
+        //Move to previous Step
+        var prevStep = StepHandler.StepQueue[StepHandler.currentStepIndex - 1];
         var $currentStep = step.getElement();
         var $currentForm = step.getFormElement();
         $currentStep.attr('id', prevStep.id);
@@ -241,7 +258,7 @@ var StepHandler = (function () {
      */
     StepHandler.onNextClicked = function () {
         var $next = $('button#btn_next');
-        //Verify that data was been entered
+        //Verify that data has been entered
         if (!StepHandler.getCurrentStep().getData()) {
             //TODO: Display a fancy warning
             $next.text('Please fill out the form first.');
@@ -269,30 +286,44 @@ var StepHandler = (function () {
         //Execute Logic corresponding to the Step
         StepHandler.StepLogic(step.id);
         // Take the first Step and put to the end of the Queue
-        StepHandler.StepQueue.push(StepHandler.StepQueue.shift());
+        //StepHandler.StepQueue.push(StepHandler.StepQueue.shift());
         //Move to next step
-        var nextStep = StepHandler.StepQueue[0];
+        var nextStep = StepHandler.StepQueue[StepHandler.currentStepIndex + 1];
         var $currentStep = step.getElement();
         var $currentForm = step.getFormElement();
         $currentStep.attr('id', nextStep.id);
         $currentStep.empty();
         $currentStep.append(nextStep.form.createElement());
+        //Next event is complex, calling the onStepChange here
+        StepHandler.onStepChange();
     };
     /**
      * Handles individual Step logic such as disabling or reordering of Steps in the StepQueue
      * TODO: Make this information contained in a .logic() method in each Step Object
-     * @param {string} currentStepID
+     * @param {string} stepID
      */
-    StepHandler.StepLogic = function (currentStepID) {
-        switch (currentStepID) {
+    StepHandler.StepLogic = function (stepID) {
+        switch (stepID) {
             case "value":
                 break;
             case "finish":
                 StepHandler.onFinish();
                 break;
+            case "start":
+                StepHandler.onStart();
+                break;
             default:
                 break;
         }
+    };
+    /**
+     * Called when User reaches first Step (step#start)
+     *
+     * @static
+     *
+     * @memberOf StepHandler
+     */
+    StepHandler.onStart = function () {
     };
     /**
      * Called when User reaches last Step (step#finish)
@@ -302,7 +333,7 @@ var StepHandler = (function () {
      * @memberOf StepHandler
      */
     StepHandler.onFinish = function () {
-        $('#btn_next').hide(); //we don't want the user to continue
+        //TODO: Have a special button in Finish that calls submitData
         StepHandler.submitData();
     };
     /**
@@ -371,6 +402,7 @@ var StepHandler = (function () {
 StepHandler.Steps = [];
 StepHandler.StepQueue = [];
 StepHandler.StepData = [];
+StepHandler.currentStepIndex = 0;
 StepHandler.readyForNext = false;
 var LoadMethod;
 (function (LoadMethod) {
@@ -455,12 +487,13 @@ var Information = (function () {
 /// <reference path="StepHandler.ts" />
 //Manually load the steps for now
 var steps = [];
-steps.push(new Step("intro", new Information("Hello", "Hope this displays correctly :)")));
+steps.push(new Step("start", new Information("Hello", "Hope this displays correctly :)")));
 steps.push(new Step("misc_wifi", new Check("WiFi", "Do you want WiFi in your computer?", true)));
 steps.push(new Step("use", new Select("Use", "What are you going to use the Computer for?", [
     new Option("Gaming", "gaming"),
     new Option("Office", "office")
 ])));
+steps.push(new Step("finish", new Information("Finished", "We are finished")));
 //StepHandler.loadSteps(LoadMethod.JSON, JSON.stringify(steps));
 StepHandler.Steps = steps;
 $(document).ready(StepHandler.Init);
