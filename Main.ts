@@ -2,7 +2,7 @@
 //Manually load the steps for now
 var steps: Step[] = [];
 steps.push(
-    new Step("intro",
+    new Step("start",
         new Information("Hello", "Hope this displays correctly :)")));
 steps.push(
     new Step("misc_wifi",
@@ -13,6 +13,10 @@ steps.push(
             new Option("Gaming", "gaming"),
             new Option("Office", "office")
         ])));
+steps.push(
+    new Step("finish",
+        new Information("Finished", "We are finished")));
+
 //StepHandler.loadSteps(LoadMethod.JSON, JSON.stringify(steps));
 StepHandler.Steps = steps;
 $(document).ready(StepHandler.Init);
