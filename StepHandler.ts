@@ -13,7 +13,7 @@ class StepHandler {
      * @param {Object} params
      * @returns {boolean}
      */
-    static loadSteps(method: LoadMethod = LoadMethod.Local, params?: any): boolean {
+    static loadSteps(method: LoadMethod = LoadMethod.Local, params ? : any): boolean {
         switch (method) {
             case LoadMethod.JSON:
 
@@ -35,7 +35,7 @@ class StepHandler {
      * @param {string} id 
      * @returns {Step} If not found, will return null
      */
-    static getStep(id: string, queue?: boolean): Step {
+    static getStep(id: string, queue ? : boolean): Step {
         if (queue) {
             return StepHandler.StepQueue.filter((x: Step) => x.id === id)[0];
         } else {
@@ -50,7 +50,8 @@ class StepHandler {
      */
     static getCurrentStep(): Step {
         try {
-            var id = $('step').attr('id');
+            var id = $('step')
+                .attr('id');
         } catch (error) {
             throw "No Step found in DOM at the moment; " + error;
         }
@@ -101,18 +102,21 @@ class StepHandler {
      * @returns {JQuery}
      */
     static createNav(): JQuery {
-        var $nav = StepHandler.c("div", {
+        var $nav = FormHelper.c("div", {
             id: "navigation",
             class: "clearfix"
         });
-        var $back = StepHandler.c("button", {
-            id: "btn_back"
-        }).text("< Back");
-        var $next = StepHandler.c("button", {
-            id: "btn_next"
-        }).text("Next >");
+        var $back = FormHelper.c("button", {
+                id: "btn_back"
+            })
+            .text("< Back");
+        var $next = FormHelper.c("button", {
+                id: "btn_next"
+            })
+            .text("Next >");
 
-        return $nav.append($back).append($next);
+        return $nav.append($back)
+            .append($next);
     };
 
     /**
@@ -138,11 +142,11 @@ class StepHandler {
      * @memberOf StepHandler
      */
     static createProgressBar(): JQuery {
-        var $progress = StepHandler.c('div', {
+        var $progress = FormHelper.c('div', {
             id: "progress"
         });
 
-        var $progress_bar = StepHandler.c('div', {
+        var $progress_bar = FormHelper.c('div', {
             id: "progress_bar"
         });
 
@@ -156,14 +160,16 @@ class StepHandler {
      * @memberOf StepHandler
      */
     static registerEvents() {
-        $('button#btn_next').click(() => {
-            StepHandler.onNextClicked();
-            //onStepChange called in onStepComplete
-        });
-        $('button#btn_back').click(() => {
-            StepHandler.onBackClicked();
-            StepHandler.onStepChange();
-        });
+        $('button#btn_next')
+            .click(() => {
+                StepHandler.onNextClicked();
+                //onStepChange called in onStepComplete
+            });
+        $('button#btn_back')
+            .click(() => {
+                StepHandler.onBackClicked();
+                StepHandler.onStepChange();
+            });
     }
 
     /**
@@ -179,15 +185,21 @@ class StepHandler {
         //Update currentStepIndex
         StepHandler.currentStepIndex = StepHandler.StepQueue.indexOf(StepHandler.getCurrentStep());
         //Hide/show buttons
-        if (StepHandler.getCurrentStep().id == "start") {
-            $('#btn_back').hide();
+        if (StepHandler.getCurrentStep()
+            .id == "start") {
+            $('#btn_back')
+                .hide();
         } else {
-            $('#btn_back').show();
+            $('#btn_back')
+                .show();
         }
-        if (StepHandler.getCurrentStep().id == "finish") {
-            $('#btn_next').hide();
+        if (StepHandler.getCurrentStep()
+            .id == "finish") {
+            $('#btn_next')
+                .hide();
         } else {
-            $('#btn_next').show();
+            $('#btn_next')
+                .show();
         }
     }
 
@@ -228,7 +240,8 @@ class StepHandler {
         var $next = $('button#btn_next');
 
         //Verify that data has been entered
-        if (!StepHandler.getCurrentStep().getData()) {
+        if (!StepHandler.getCurrentStep()
+            .getData()) {
             //TODO: Display a fancy warning
             $next.text('Please fill out the form first.')
             return;
@@ -328,16 +341,17 @@ class StepHandler {
         var data = StepHandler.StepData;
 
         $.ajax({
-            type: "POST",
-            url: "/api/default",
-            data: data,
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-        }).then((success) => {
-            //do something
-        }, (failure) => {
-            //we failed, oh noes
-        });
+                type: "POST",
+                url: "/api/default",
+                data: data,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+            })
+            .then((success) => {
+                //do something
+            }, (failure) => {
+                //we failed, oh noes
+            });
     }
 
     /**
@@ -370,23 +384,6 @@ class StepHandler {
             //TODO: Create Progress Bar
         }
     };
-
-    /**
-     * A wrapper for the jQuery element creation.
-     * Faster and more compatible than pure jQuery
-     * @param {string} element
-     * @param {Object} attributes
-     * @returns {JQuery}
-     */
-
-    static c(element: string, attributes?: Object): JQuery {
-        var e = $(document.createElement(element));
-        if (attributes) {
-            e.attr(attributes);
-        }
-        return e;
-    }
-
 }
 
 enum LoadMethod {
