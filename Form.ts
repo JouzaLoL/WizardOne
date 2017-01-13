@@ -114,13 +114,14 @@ class FormRange implements Form {
     createElement(): JQuery {
 
         var $element = FormHelper.createForm(this.title, this.text);
-
+        //Fix for the pesky "this"" handling in JS :/
+        var THIS = this;
         var $range = FormHelper.c('input', {
             type: "range",
-            min: this.min,
-            max: this.min,
-            step: this.min,
-            defaultValue: this.defaultValue
+            min: THIS.min,
+            max: THIS.max,
+            step: THIS.step,
+            defaultValue: THIS.defaultValue
         });
         $element.append($range);
 
@@ -132,6 +133,7 @@ class FormRange implements Form {
         this.min = min;
         this.max = max;
         this.step = step;
+        this.defaultValue = defaultValue;
     }
 }
 
