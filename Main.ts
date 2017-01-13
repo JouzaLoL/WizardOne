@@ -16,7 +16,6 @@ steps.push(
 steps.push(
     new Step("finish",
         new Information("Finished", "We are finished")));
-//Refresher: Edit this to spawn a commit
 //StepHandler.loadSteps(LoadMethod.JSON, JSON.stringify(steps));
 StepHandler.Steps = steps;
 $(document).ready(StepHandler.Init);
