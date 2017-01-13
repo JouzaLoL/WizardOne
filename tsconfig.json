@@ -8,8 +8,6 @@
         "outFile": "www/script.js"
     },
     "include": [
-        "*",
-        "*.*",
-        "*/*.*"
+        "*.ts"
     ]
 }
