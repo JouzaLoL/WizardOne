@@ -6,7 +6,7 @@ steps.push(
         new Information("Hello", "Hope this displays correctly :)")));
 steps.push(
     new Step("misc_wifi",
-        new Check("WiFi", "Do you want WiFi in your computer?", true)));
+        new Checkbox("WiFi", "Do you want WiFi in your computer?", true)));
 steps.push(
     new Step("use",
         new Select("Use", "What are you going to use the Computer for?", [

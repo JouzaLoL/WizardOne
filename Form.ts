@@ -49,7 +49,7 @@ interface Option {
     value: string;
 }
 
-class Check implements Form {
+class Checkbox implements Form {
     title: string;
     text: string;
     checked: boolean;
@@ -66,7 +66,7 @@ class Check implements Form {
         $element.append($title).append($text);
 
         var $check = FormHelper.c('input', {
-            name: 'check',
+            name: 'checkbox',
             type: 'checkbox'
         }).prop('checked', this.checked);
         $element.append($check);

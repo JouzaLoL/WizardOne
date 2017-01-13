@@ -439,14 +439,14 @@ var Select = (function () {
     };
     return Select;
 }());
-var Check = (function () {
-    function Check(title, text, checked) {
+var Checkbox = (function () {
+    function Checkbox(title, text, checked) {
         if (checked === void 0) { checked = false; }
         this.title = title;
         this.text = text;
         this.checked = checked;
     }
-    Check.prototype.createElement = function () {
+    Checkbox.prototype.createElement = function () {
         var $element = FormHelper.c('form');
         var $title = FormHelper.c('div', {
             id: 'title'
@@ -456,14 +456,14 @@ var Check = (function () {
         }).text(this.text);
         $element.append($title).append($text);
         var $check = FormHelper.c('input', {
-            name: 'check',
+            name: 'checkbox',
             type: 'checkbox'
         }).prop('checked', this.checked);
         $element.append($check);
         return $element;
     };
     ;
-    return Check;
+    return Checkbox;
 }());
 var Information = (function () {
     function Information(title, text) {
@@ -559,7 +559,7 @@ var FormHelper = (function () {
 //Manually load the steps for now
 var steps = [];
 steps.push(new Step("start", new Information("Hello", "Hope this displays correctly :)")));
-steps.push(new Step("misc_wifi", new Check("WiFi", "Do you want WiFi in your computer?", true)));
+steps.push(new Step("misc_wifi", new Checkbox("WiFi", "Do you want WiFi in your computer?", true)));
 steps.push(new Step("use", new Select("Use", "What are you going to use the Computer for?", [
     new Option("Gaming", "gaming"),
     new Option("Office", "office")
