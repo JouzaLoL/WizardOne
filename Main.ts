@@ -14,8 +14,13 @@ steps.push(
             new Option("Office", "office")
         ])));
 steps.push(
+    new Step("price",
+        new FormRange("Price", "How much should the computer cost AT MOST?"))
+);
+steps.push(
     new Step("finish",
         new Information("Finished", "We are finished")));
 //StepHandler.loadSteps(LoadMethod.JSON, JSON.stringify(steps));
 StepHandler.Steps = steps;
-$(document).ready(StepHandler.Init);
+$(document)
+    .ready(StepHandler.Init);

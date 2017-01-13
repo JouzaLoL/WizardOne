@@ -12,7 +12,7 @@ var Step = (function () {
         this.form = form;
     }
     Step.prototype.createElement = function () {
-        var wrapper = StepHandler.c('step', { id: this.id });
+        var wrapper = FormHelper.c('step', { id: this.id });
         var el = wrapper.append(this.form.createElement());
         return el;
     };
@@ -97,7 +97,8 @@ var StepHandler = (function () {
      */
     StepHandler.getCurrentStep = function () {
         try {
-            var id = $('step').attr('id');
+            var id = $('step')
+                .attr('id');
         }
         catch (error) {
             throw "No Step found in DOM at the moment; " + error;
@@ -143,17 +144,20 @@ var StepHandler = (function () {
      * @returns {JQuery}
      */
     StepHandler.createNav = function () {
-        var $nav = StepHandler.c("div", {
+        var $nav = FormHelper.c("div", {
             id: "navigation",
             class: "clearfix"
         });
-        var $back = StepHandler.c("button", {
+        var $back = FormHelper.c("button", {
             id: "btn_back"
-        }).text("< Back");
-        var $next = StepHandler.c("button", {
+        })
+            .text("< Back");
+        var $next = FormHelper.c("button", {
             id: "btn_next"
-        }).text("Next >");
-        return $nav.append($back).append($next);
+        })
+            .text("Next >");
+        return $nav.append($back)
+            .append($next);
     };
     ;
     /**
@@ -178,10 +182,10 @@ var StepHandler = (function () {
      * @memberOf StepHandler
      */
     StepHandler.createProgressBar = function () {
-        var $progress = StepHandler.c('div', {
+        var $progress = FormHelper.c('div', {
             id: "progress"
         });
-        var $progress_bar = StepHandler.c('div', {
+        var $progress_bar = FormHelper.c('div', {
             id: "progress_bar"
         });
         return $progress.append($progress_bar);
@@ -193,11 +197,13 @@ var StepHandler = (function () {
      * @memberOf StepHandler
      */
     StepHandler.registerEvents = function () {
-        $('button#btn_next').click(function () {
+        $('button#btn_next')
+            .click(function () {
             StepHandler.onNextClicked();
             //onStepChange called in onStepComplete
         });
-        $('button#btn_back').click(function () {
+        $('button#btn_back')
+            .click(function () {
             StepHandler.onBackClicked();
             StepHandler.onStepChange();
         });
@@ -215,17 +221,23 @@ var StepHandler = (function () {
         //Update currentStepIndex
         StepHandler.currentStepIndex = StepHandler.StepQueue.indexOf(StepHandler.getCurrentStep());
         //Hide/show buttons
-        if (StepHandler.getCurrentStep().id == "start") {
-            $('#btn_back').hide();
+        if (StepHandler.getCurrentStep()
+            .id == "start") {
+            $('#btn_back')
+                .hide();
         }
         else {
-            $('#btn_back').show();
+            $('#btn_back')
+                .show();
         }
-        if (StepHandler.getCurrentStep().id == "finish") {
-            $('#btn_next').hide();
+        if (StepHandler.getCurrentStep()
+            .id == "finish") {
+            $('#btn_next')
+                .hide();
         }
         else {
-            $('#btn_next').show();
+            $('#btn_next')
+                .show();
         }
     };
     /**
@@ -259,7 +271,8 @@ var StepHandler = (function () {
     StepHandler.onNextClicked = function () {
         var $next = $('button#btn_next');
         //Verify that data has been entered
-        if (!StepHandler.getCurrentStep().getData()) {
+        if (!StepHandler.getCurrentStep()
+            .getData()) {
             //TODO: Display a fancy warning
             $next.text('Please fill out the form first.');
             return;
@@ -351,7 +364,8 @@ var StepHandler = (function () {
             data: data,
             contentType: "application/json; charset=utf-8",
             dataType: "json",
-        }).then(function (success) {
+        })
+            .then(function (success) {
             //do something
         }, function (failure) {
             //we failed, oh noes
@@ -383,20 +397,6 @@ var StepHandler = (function () {
         }
     };
     ;
-    /**
-     * A wrapper for the jQuery element creation.
-     * Faster and more compatible than pure jQuery
-     * @param {string} element
-     * @param {Object} attributes
-     * @returns {JQuery}
-     */
-    StepHandler.c = function (element, attributes) {
-        var e = $(document.createElement(element));
-        if (attributes) {
-            e.attr(attributes);
-        }
-        return e;
-    };
     return StepHandler;
 }());
 StepHandler.Steps = [];
@@ -418,19 +418,19 @@ var Select = (function () {
         this.options = options;
     }
     Select.prototype.createElement = function () {
-        var $element = StepHandler.c('form');
-        var $title = StepHandler.c('div', {
+        var $element = FormHelper.c('form');
+        var $title = FormHelper.c('div', {
             id: "title"
         }).text(this.title);
-        var $text = StepHandler.c('div', {
+        var $text = FormHelper.c('div', {
             id: "text"
         }).text(this.text);
         $element.append($title).append($text);
-        var $select = StepHandler.c("select", {
+        var $select = FormHelper.c("select", {
             name: "select"
         });
         this.options.forEach(function (el) {
-            StepHandler.c("option", {
+            FormHelper.c("option", {
                 value: el.value
             }).text(el.text).appendTo($select);
         });
@@ -447,15 +447,15 @@ var Check = (function () {
         this.checked = checked;
     }
     Check.prototype.createElement = function () {
-        var $element = StepHandler.c('form');
-        var $title = StepHandler.c('div', {
+        var $element = FormHelper.c('form');
+        var $title = FormHelper.c('div', {
             id: 'title'
         }).text(this.title);
-        var $text = StepHandler.c('div', {
+        var $text = FormHelper.c('div', {
             id: 'text'
         }).text(this.text);
         $element.append($title).append($text);
-        var $check = StepHandler.c('input', {
+        var $check = FormHelper.c('input', {
             name: 'check',
             type: 'checkbox'
         }).prop('checked', this.checked);
@@ -471,11 +471,11 @@ var Information = (function () {
         this.text = text;
     }
     Information.prototype.createElement = function () {
-        var $element = StepHandler.c('form');
-        var $title = StepHandler.c('div', {
+        var $element = FormHelper.c('form');
+        var $title = FormHelper.c('div', {
             id: 'title'
         }).text(this.title);
-        var $text = StepHandler.c('div', {
+        var $text = FormHelper.c('div', {
             id: 'text'
         }).text(this.text);
         $element.append($title).append($text);
@@ -483,6 +483,73 @@ var Information = (function () {
     };
     ;
     return Information;
+}());
+var FormRange = (function () {
+    function FormRange(title, text, min, max, step, defaultValue) {
+        if (min === void 0) { min = 0; }
+        if (max === void 0) { max = 30000; }
+        if (step === void 0) { step = 500; }
+        if (defaultValue === void 0) { defaultValue = 20000; }
+        this.title = title;
+        this.text = text;
+        this.min = min;
+        this.max = max;
+        this.step = step;
+    }
+    FormRange.prototype.createElement = function () {
+        var $element = FormHelper.createForm(this.title, this.text);
+        var $range = FormHelper.c('input', {
+            type: "range",
+            min: this.min,
+            max: this.min,
+            step: this.min,
+            defaultValue: this.defaultValue
+        });
+        $element.append($range);
+        return $element;
+    };
+    ;
+    return FormRange;
+}());
+var FormHelper = (function () {
+    function FormHelper() {
+    }
+    /**
+     * A wrapper for the jQuery element creation.
+     * Faster and more compatible than pure jQuery
+     * @param {string} element Tag name of the element. E.g. 'form', 'div'
+     * @param {Object} attributes Attributes of the element. Format: { attribute: "value" }
+     * @returns {JQuery}
+     */
+    FormHelper.c = function (element, attributes) {
+        var e = $(document.createElement(element));
+        if (attributes) {
+            e.attr(attributes);
+        }
+        return e;
+    };
+    /**
+     * Creates a basic Form with Title and Text and returns it as a JQuery object
+     *
+     * @static
+     * @param {string} title
+     * @param {string} text
+     * @returns {JQuery}
+     *
+     * @memberOf FormHelper
+     */
+    FormHelper.createForm = function (title, text) {
+        var $element = FormHelper.c('form');
+        var $title = FormHelper.c('div', {
+            id: 'title'
+        }).text(title);
+        var $text = FormHelper.c('div', {
+            id: 'text'
+        }).text(text);
+        $element.append($title).append($text);
+        return $element;
+    };
+    return FormHelper;
 }());
 /// <reference path="StepHandler.ts" />
 //Manually load the steps for now
@@ -493,7 +560,9 @@ steps.push(new Step("use", new Select("Use", "What are you going to use the Comp
     new Option("Gaming", "gaming"),
     new Option("Office", "office")
 ])));
+steps.push(new Step("price", new FormRange("Price", "How much should the computer cost AT MOST?")));
 steps.push(new Step("finish", new Information("Finished", "We are finished")));
 //StepHandler.loadSteps(LoadMethod.JSON, JSON.stringify(steps));
 StepHandler.Steps = steps;
-$(document).ready(StepHandler.Init);
+$(document)
+    .ready(StepHandler.Init);

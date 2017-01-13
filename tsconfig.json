@@ -9,5 +9,9 @@
     },
     "include": [
         "*.ts"
+    ],
+    "exclude": [
+        "typings",
+        "node_modules"
     ]
 }
