@@ -15,21 +15,21 @@ class Select implements Form {
     text: string;
     options: Option[];
     createElement(): JQuery {
-        var $element = StepHandler.c('form');
+        var $element = FormHelper.c('form');
 
-        var $title = StepHandler.c('div', {
+        var $title = FormHelper.c('div', {
             id: "title"
         }).text(this.title);
-        var $text = StepHandler.c('div', {
+        var $text = FormHelper.c('div', {
             id: "text"
         }).text(this.text);
         $element.append($title).append($text);
 
-        var $select = StepHandler.c("select", {
+        var $select = FormHelper.c("select", {
             name: "select"
         });
         this.options.forEach(el => {
-            StepHandler.c("option", {
+            FormHelper.c("option", {
                 value: el.value
             }).text(el.text).appendTo($select);
         });
@@ -50,22 +50,22 @@ interface Option {
 }
 
 class Check implements Form {
-    checked: boolean;
     title: string;
     text: string;
+    checked: boolean;
     createElement(): JQuery {
 
-        var $element = StepHandler.c('form');
+        var $element = FormHelper.c('form');
 
-        var $title = StepHandler.c('div', {
+        var $title = FormHelper.c('div', {
             id: 'title'
         }).text(this.title);
-        var $text = StepHandler.c('div', {
+        var $text = FormHelper.c('div', {
             id: 'text'
         }).text(this.text);
         $element.append($title).append($text);
 
-        var $check = StepHandler.c('input', {
+        var $check = FormHelper.c('input', {
             name: 'check',
             type: 'checkbox'
         }).prop('checked', this.checked);
@@ -85,12 +85,12 @@ class Information implements Form {
     text: string;
     createElement(): JQuery {
 
-        var $element = StepHandler.c('form');
+        var $element = FormHelper.c('form');
 
-        var $title = StepHandler.c('div', {
+        var $title = FormHelper.c('div', {
             id: 'title'
         }).text(this.title);
-        var $text = StepHandler.c('div', {
+        var $text = FormHelper.c('div', {
             id: 'text'
         }).text(this.text);
         $element.append($title).append($text);
@@ -100,5 +100,78 @@ class Information implements Form {
     constructor(title: string, text: string) {
         this.title = title;
         this.text = text;
+    }
+}
+
+class Range implements Form {
+    title: string;
+    text: string;
+    value: number;
+    min: number;
+    max: number;
+    step: number;
+    defaultValue: number;
+    createElement(): JQuery {
+
+        var $element = FormHelper.createForm(this.title, this.text);
+
+        var $range = FormHelper.c('range', {
+            type: "range",
+            min: this.min,
+            max: this.min,
+            step: this.min,
+            defaultValue: this.defaultValue
+        });
+        $element.append($range);
+
+        return $element;
+    };
+    constructor(title: string, text: string, min: number = 0, max: number = 30000, step: number = 500, defaultValue: number = 20000) {
+        this.title = title;
+        this.text = text;
+        this.min = min;
+        this.max = max;
+        this.step = step;
+    }
+}
+
+class FormHelper {
+    /**
+     * A wrapper for the jQuery element creation.
+     * Faster and more compatible than pure jQuery
+     * @param {string} element Tag name of the element. E.g. 'form', 'div'
+     * @param {Object} attributes Attributes of the element. Format: { attribute: "value" }
+     * @returns {JQuery}
+     */
+    static c(element: string, attributes?: Object): JQuery {
+        var e = $(document.createElement(element));
+        if (attributes) {
+            e.attr(attributes);
+        }
+        return e;
+    }
+
+    /**
+     * Creates a basic Form with Title and Text and returns it as a JQuery object
+     * 
+     * @static
+     * @param {string} title
+     * @param {string} text
+     * @returns {JQuery}
+     * 
+     * @memberOf FormHelper
+     */
+    static createForm(title: string, text: string): JQuery {
+        var $element = FormHelper.c('form');
+
+        var $title = FormHelper.c('div', {
+            id: 'title'
+        }).text(title);
+        var $text = FormHelper.c('div', {
+            id: 'text'
+        }).text(text);
+        $element.append($title).append($text);
+
+        return $element;
     }
 }
