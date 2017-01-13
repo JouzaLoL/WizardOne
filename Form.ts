@@ -103,7 +103,7 @@ class Information implements Form {
     }
 }
 
-class Range implements Form {
+class FormRange implements Form {
     title: string;
     text: string;
     value: number;
@@ -115,7 +115,7 @@ class Range implements Form {
 
         var $element = FormHelper.createForm(this.title, this.text);
 
-        var $range = FormHelper.c('range', {
+        var $range = FormHelper.c('input', {
             type: "range",
             min: this.min,
             max: this.min,
