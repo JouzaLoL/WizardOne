@@ -503,6 +503,7 @@ var FormRange = (function () {
         var THIS = this;
         var $range = FormHelper.c('input', {
             type: "range",
+            name: "range",
             min: THIS.min,
             max: THIS.max,
             step: THIS.step,
