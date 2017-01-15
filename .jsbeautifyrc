@@ -48,8 +48,7 @@
     },
     "beautify.language": {
         "js": {
-            "type": ["javascript", "json"],
-            "filename": [".jshintrc", ".jsbeautifyrc"],
+            "type": ["javascript", "json", "typescript"],
             "ext": ["js", "json", "ts"]
         }
     }

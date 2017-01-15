@@ -8,20 +8,21 @@ class StepHandler {
 
     /**
      * Loads the Steps from JSON, DB or from the Hardcoded Steps array
-     * TODO: Make the whole function support promises, because DB and HTTP JSON GET is async
+     * Filter out Steps marked with DynamicallyAdded tag
+     * TODO: Make the whole function support promises, because DB access is async
      * @param {LoadMethod} method
      * @param {Object} params
      * @returns {boolean}
      */
-    static loadSteps(method: LoadMethod = LoadMethod.Local, params ? : any): boolean {
+    static loadSteps(method: LoadMethod = LoadMethod.Local, params?: any): boolean {
         switch (method) {
-            case LoadMethod.JSON:
 
-                break;
-            case LoadMethod.GET:
+            case LoadMethod.DB:
                 throw new Error("Not implemented yet");
-            case LoadMethod.Local:
-                console.log('Steps loaded from local Steps array');
+            case LoadMethod.Variable:
+                StepHandler.Steps = params;
+                StepHandler.StepQueue = StepHandler.filterDynAddedSteps(params);
+                break;
             default:
                 break;
         }
@@ -29,19 +30,54 @@ class StepHandler {
         return true;
     };
 
+
+    /**
+     * Filter out Steps with the DynamicallyAdded tag
+     * 
+     * @static
+     * @param {Step[]} steps
+     * @returns {Step[]}
+     * 
+     * @memberOf StepHandler
+     */
+    static filterDynAddedSteps(steps: Step[]): Step[] {
+        return steps.filter((step) => {
+            return !StepHandler.hasTag(step, StepTag.DynamicallyAdded);
+        });
+    }
+
+    static hasTag(step: Step, tag: StepTag): boolean {
+        if (step.tags == undefined) {
+            return false
+        };
+        return step.tags.indexOf(tag) != -1
+    }
+
     /**
      * Return a Step with the specified ID
      * 
      * @param {string} id 
      * @returns {Step} If not found, will return null
      */
-    static getStep(id: string, queue ? : boolean): Step {
+    static getStep(id: string, queue?: boolean): Step {
         if (queue) {
             return StepHandler.StepQueue.filter((x: Step) => x.id === id)[0];
         } else {
             return StepHandler.Steps.filter((x: Step) => x.id === id)[0];
         }
     };
+
+    static getStepsByIDContains(stepid: string, queue: boolean = false): Step[] {
+        if (queue) {
+            return StepHandler.StepQueue.filter((x: Step) => {
+                x.id.indexOf(stepid) !== -1
+            });
+        } else {
+            return StepHandler.Steps.filter((x: Step) => {
+                x.id.indexOf(stepid) !== -1
+            });
+        }
+    }
 
     /**
      * Get the Step which is currently in the DOM.
@@ -107,12 +143,12 @@ class StepHandler {
             class: "clearfix"
         });
         var $back = FormHelper.c("button", {
-                id: "btn_back"
-            })
+            id: "btn_back"
+        })
             .text("< Back");
         var $next = FormHelper.c("button", {
-                id: "btn_next"
-            })
+            id: "btn_next"
+        })
             .text("Next >");
 
         return $nav.append($back)
@@ -224,6 +260,18 @@ class StepHandler {
         $currentStep.attr('id', prevStep.id);
         $currentStep.empty();
         $currentStep.append(prevStep.form.createElement());
+
+        //Remove Dynamically Added Steps ahead if the previous step is Dynamic
+        if (StepHandler.hasTag(prevStep, StepTag.Dynamic)) {
+            try {
+                StepHandler.RemoveDynAddStepsAhead(StepHandler.currentStepIndex - 1);
+
+            } catch (TypeError) {
+                console.log("There are no dynsteps ahead.");
+                //TODO: Fix this error
+                return;
+            }
+        }
     }
 
     static readyForNext: boolean = false;
@@ -269,7 +317,7 @@ class StepHandler {
         StepHandler.StepData.push(step.getData());
 
         //Execute Logic corresponding to the Step
-        StepHandler.StepLogic(step.id);
+        StepHandler.StepLogic(step);
 
         // Take the first Step and put to the end of the Queue
         //StepHandler.StepQueue.push(StepHandler.StepQueue.shift());
@@ -288,13 +336,31 @@ class StepHandler {
 
     /**
      * Handles individual Step logic such as disabling or reordering of Steps in the StepQueue
-     * TODO: Make this information contained in a .logic() method in each Step Object
+     * 
      * @param {string} stepID
      */
-    static StepLogic(stepID: string) {
-        switch (stepID) {
-            case "value":
-
+    /**
+     * 
+     * 
+     * @static
+     * @param {Step} step
+     * 
+     * @memberOf StepHandler
+     */
+    static StepLogic(step: Step) {
+        //Store the current Step's data in a var for easier access
+        var stepData = StepHandler.StepData[StepHandler.StepData.length - 1];
+        switch (step.id) {
+            case "use":
+                var use = stepData['select'];
+                switch (use) {
+                    case "gaming":
+                        var gamingsteps = StepHandler.getStepsByIDContains("gaming");
+                        gamingsteps.forEach((step) => {
+                            StepHandler.insertStep(step);
+                        });
+                        break;
+                }
                 break;
             case "finish": //Wizard is complete
                 StepHandler.onFinish();
@@ -305,6 +371,47 @@ class StepHandler {
             default:
                 break;
         }
+    }
+
+
+    /**
+     * Insert the Step into the StepQueue INTO THE SPECIFIED INDEX.
+     * Meaning the Step will end up in the index you specified, other elements will be moved.
+     * Index defaults to after current step
+     * @static
+     * @param {number} index
+     * @param {Step} step
+     * 
+     * @memberOf StepHandler
+     */
+    static insertStep(step: Step, index: number = StepHandler.currentStepIndex + 1) {
+        StepHandler.StepQueue.splice(index, 0, step);
+    }
+
+    /**
+     * Removes Dynamically Added Steps ahead of the specified index or, if not specified, the current Step
+     * 
+     * @static
+     * @param {number} index The index to start at
+     * 
+     * @memberOf StepHandler
+     */
+    static RemoveDynAddStepsAhead(index: number = StepHandler.currentStepIndex) {
+        //Get Steps ahead of the current Step
+        var ahead = StepHandler.StepQueue.slice(StepHandler.currentStepIndex);
+
+        //Find DynamicallyAdded Steps in the sliced array
+        var dynadded = ahead.filter((el) => {
+            return StepHandler.hasTag(el, StepTag.DynamicallyAdded);
+        });
+
+        //Remove these Steps from the StepQueue
+        dynadded.forEach((dynaddstep) => {
+            var index = StepHandler.StepQueue.indexOf(dynaddstep);
+            if (index > -1) {
+                StepHandler.StepQueue.splice(index, 1);
+            }
+        });
     }
 
     /**
@@ -341,12 +448,12 @@ class StepHandler {
         var data = StepHandler.StepData;
 
         $.ajax({
-                type: "POST",
-                url: "/api/default",
-                data: data,
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-            })
+            type: "POST",
+            url: "/api/default",
+            data: data,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+        })
             .then((success) => {
                 //do something
             }, (failure) => {
@@ -387,7 +494,7 @@ class StepHandler {
 }
 
 enum LoadMethod {
-    JSON,
-    GET,
-    Local
+    DB,
+    Local,
+    Variable
 }

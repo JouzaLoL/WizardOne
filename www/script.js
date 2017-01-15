@@ -7,9 +7,10 @@
  * @class Step
  */
 var Step = (function () {
-    function Step(id, form) {
+    function Step(id, form, tags) {
         this.id = id;
         this.form = form;
+        this.tags = tags;
     }
     Step.prototype.createElement = function () {
         var wrapper = FormHelper.c('step', { id: this.id });
@@ -49,13 +50,19 @@ var Step = (function () {
     ;
     return Step;
 }());
+var StepTag;
+(function (StepTag) {
+    StepTag[StepTag["Dynamic"] = 0] = "Dynamic";
+    StepTag[StepTag["DynamicallyAdded"] = 1] = "DynamicallyAdded";
+})(StepTag || (StepTag = {}));
 /// <reference path="Step.ts" />
 var StepHandler = (function () {
     function StepHandler() {
     }
     /**
      * Loads the Steps from JSON, DB or from the Hardcoded Steps array
-     * TODO: Make the whole function support promises, because DB and HTTP JSON GET is async
+     * Filter out Steps marked with DynamicallyAdded tag
+     * TODO: Make the whole function support promises, because DB access is async
      * @param {LoadMethod} method
      * @param {Object} params
      * @returns {boolean}
@@ -63,18 +70,39 @@ var StepHandler = (function () {
     StepHandler.loadSteps = function (method, params) {
         if (method === void 0) { method = LoadMethod.Local; }
         switch (method) {
-            case LoadMethod.JSON:
-                break;
-            case LoadMethod.GET:
+            case LoadMethod.DB:
                 throw new Error("Not implemented yet");
-            case LoadMethod.Local:
-                console.log('Steps loaded from local Steps array');
+            case LoadMethod.Variable:
+                StepHandler.Steps = params;
+                StepHandler.StepQueue = StepHandler.filterDynAddedSteps(params);
+                break;
             default:
                 break;
         }
         return true;
     };
     ;
+    /**
+     * Filter out Steps with the DynamicallyAdded tag
+     *
+     * @static
+     * @param {Step[]} steps
+     * @returns {Step[]}
+     *
+     * @memberOf StepHandler
+     */
+    StepHandler.filterDynAddedSteps = function (steps) {
+        return steps.filter(function (step) {
+            return !StepHandler.hasTag(step, StepTag.DynamicallyAdded);
+        });
+    };
+    StepHandler.hasTag = function (step, tag) {
+        if (step.tags == undefined) {
+            return false;
+        }
+        ;
+        return step.tags.indexOf(tag) != -1;
+    };
     /**
      * Return a Step with the specified ID
      *
@@ -90,6 +118,19 @@ var StepHandler = (function () {
         }
     };
     ;
+    StepHandler.getStepsByIDContains = function (stepid, queue) {
+        if (queue === void 0) { queue = false; }
+        if (queue) {
+            return StepHandler.StepQueue.filter(function (x) {
+                x.id.indexOf(stepid) !== -1;
+            });
+        }
+        else {
+            return StepHandler.Steps.filter(function (x) {
+                x.id.indexOf(stepid) !== -1;
+            });
+        }
+    };
     /**
      * Get the Step which is currently in the DOM.
      *
@@ -259,6 +300,17 @@ var StepHandler = (function () {
         $currentStep.attr('id', prevStep.id);
         $currentStep.empty();
         $currentStep.append(prevStep.form.createElement());
+        //Remove Dynamically Added Steps ahead if the previous step is Dynamic
+        if (StepHandler.hasTag(prevStep, StepTag.Dynamic)) {
+            try {
+                StepHandler.RemoveDynAddStepsAhead(StepHandler.currentStepIndex - 1);
+            }
+            catch (TypeError) {
+                console.log("There are no dynsteps ahead.");
+                //TODO: Fix this error
+                return;
+            }
+        }
     };
     /**
      * Fired when the User clicks the Next button
@@ -297,7 +349,7 @@ var StepHandler = (function () {
         //Extract and store the Step data
         StepHandler.StepData.push(step.getData());
         //Execute Logic corresponding to the Step
-        StepHandler.StepLogic(step.id);
+        StepHandler.StepLogic(step);
         // Take the first Step and put to the end of the Queue
         //StepHandler.StepQueue.push(StepHandler.StepQueue.shift());
         //Move to next step
@@ -312,12 +364,31 @@ var StepHandler = (function () {
     };
     /**
      * Handles individual Step logic such as disabling or reordering of Steps in the StepQueue
-     * TODO: Make this information contained in a .logic() method in each Step Object
+     *
      * @param {string} stepID
      */
-    StepHandler.StepLogic = function (stepID) {
-        switch (stepID) {
-            case "value":
+    /**
+     *
+     *
+     * @static
+     * @param {Step} step
+     *
+     * @memberOf StepHandler
+     */
+    StepHandler.StepLogic = function (step) {
+        //Store the current Step's data in a var for easier access
+        var stepData = StepHandler.StepData[StepHandler.StepData.length - 1];
+        switch (step.id) {
+            case "use":
+                var use = stepData['select'];
+                switch (use) {
+                    case "gaming":
+                        var gamingsteps = StepHandler.getStepsByIDContains("gaming");
+                        gamingsteps.forEach(function (step) {
+                            StepHandler.insertStep(step);
+                        });
+                        break;
+                }
                 break;
             case "finish":
                 StepHandler.onFinish();
@@ -328,6 +399,44 @@ var StepHandler = (function () {
             default:
                 break;
         }
+    };
+    /**
+     * Insert the Step into the StepQueue INTO THE SPECIFIED INDEX.
+     * Meaning the Step will end up in the index you specified, other elements will be moved.
+     * Index defaults to after current step
+     * @static
+     * @param {number} index
+     * @param {Step} step
+     *
+     * @memberOf StepHandler
+     */
+    StepHandler.insertStep = function (step, index) {
+        if (index === void 0) { index = StepHandler.currentStepIndex + 1; }
+        StepHandler.StepQueue.splice(index, 0, step);
+    };
+    /**
+     * Removes Dynamically Added Steps ahead of the specified index or, if not specified, the current Step
+     *
+     * @static
+     * @param {number} index The index to start at
+     *
+     * @memberOf StepHandler
+     */
+    StepHandler.RemoveDynAddStepsAhead = function (index) {
+        if (index === void 0) { index = StepHandler.currentStepIndex; }
+        //Get Steps ahead of the current Step
+        var ahead = StepHandler.StepQueue.slice(StepHandler.currentStepIndex);
+        //Find DynamicallyAdded Steps in the sliced array
+        var dynadded = ahead.filter(function (el) {
+            return StepHandler.hasTag(el, StepTag.DynamicallyAdded);
+        });
+        //Remove these Steps from the StepQueue
+        dynadded.forEach(function (dynaddstep) {
+            var index = StepHandler.StepQueue.indexOf(dynaddstep);
+            if (index > -1) {
+                StepHandler.StepQueue.splice(index, 1);
+            }
+        });
     };
     /**
      * Called when User reaches first Step (step#start)
@@ -406,9 +515,9 @@ StepHandler.currentStepIndex = 0;
 StepHandler.readyForNext = false;
 var LoadMethod;
 (function (LoadMethod) {
-    LoadMethod[LoadMethod["JSON"] = 0] = "JSON";
-    LoadMethod[LoadMethod["GET"] = 1] = "GET";
-    LoadMethod[LoadMethod["Local"] = 2] = "Local";
+    LoadMethod[LoadMethod["DB"] = 0] = "DB";
+    LoadMethod[LoadMethod["Local"] = 1] = "Local";
+    LoadMethod[LoadMethod["Variable"] = 2] = "Variable";
 })(LoadMethod || (LoadMethod = {}));
 /// <reference path="StepHandler.ts" />
 var Select = (function () {
@@ -558,15 +667,16 @@ var FormHelper = (function () {
 /// <reference path="StepHandler.ts" />
 //Manually load the steps for now
 var steps = [];
-steps.push(new Step("start", new Information("Hello", "Hope this displays correctly :)")));
-steps.push(new Step("misc_wifi", new Checkbox("WiFi", "Do you want WiFi in your computer?", true)));
+steps.push(new Step("start", new Information("Hello", "Welcome to Wizard")));
+steps.push(new Step("price", new FormRange("Price", "How much should the computer cost AT MOST?")));
 steps.push(new Step("use", new Select("Use", "What are you going to use the Computer for?", [
     new Option("Gaming", "gaming"),
-    new Option("Office", "office")
-])));
-steps.push(new Step("price", new FormRange("Price", "How much should the computer cost AT MOST?")));
+    new Option("Office", "office"),
+    new Option("Multimedia", "multimedia")
+]), [StepTag.Dynamic]));
+steps.push(new Step("gaming_test", new Information("DynAdd test - Gaming", "DynAdd Test - Gaming"), [StepTag.DynamicallyAdded]));
+steps.push(new Step("misc_wifi", new Checkbox("WiFi", "Do you want WiFi in your computer?", true)));
 steps.push(new Step("finish", new Information("Finished", "We are finished")));
-//StepHandler.loadSteps(LoadMethod.JSON, JSON.stringify(steps));
-StepHandler.Steps = steps;
+StepHandler.loadSteps(LoadMethod.Variable, steps);
 $(document)
     .ready(StepHandler.Init);
