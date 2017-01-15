@@ -10,6 +10,7 @@
 class Step {
     id: string;
     form: Form;
+    tags: StepTag[];
     createElement(): JQuery {
         var wrapper = FormHelper.c('step', {id: this.id});
         var el = wrapper.append(this.form.createElement());
@@ -43,8 +44,14 @@ class Step {
         });
         return o;
     };
-    constructor(id: string, form: Form) {
+    constructor(id: string, form: Form, tags?: StepTag[]) {
         this.id = id;
         this.form = form;
+        this.tags = tags;
     }
+}
+
+enum StepTag {
+    Dynamic,
+    DynamicallyAdded
 }
