@@ -42,6 +42,8 @@ class Step {
                 o[this.name] = this.value || '';
             }
         });
+        //Assign an ID to the Data object
+        o['id'] = this.id;
         return o;
     };
     constructor(id: string, form: Form, tags?: StepTag[]) {
