@@ -1,3 +1,77 @@
+/**
+ * Responsible for
+ * * Encoding and decoding Steps
+ *
+ * @class Encoder
+ */
+class Encoder {
+    /**
+     * Encodes the Steps provided for exchange between front and back-end
+     *
+     * @static
+     * @param {Step[]} steps The Steps to be encoded
+     * @returns {string} A JSON-string containing the Steps encoded in Format
+     *
+     * @memberOf Encoder
+     */
+    static EncodeSteps(steps) {
+        var readySteps = new Array();
+        var steps = new Array().concat(steps);
+        steps.forEach(step => {
+            //Add information about Form Class
+            var formclass = Encoder.getFormClass(step);
+            step['FormClass'] = formclass;
+            //Add the ready Step to be encoded
+            readySteps.push(step);
+        });
+        //Encode and return the Steps
+        return JSON.stringify(readySteps);
+    }
+    /**
+     * Decodes the JSON-string into Step objects
+     *
+     * @static
+     * @param {string} json
+     * @returns {Step[]}
+     *
+     * @memberOf Encoder
+     */
+    static DecodeSteps(json) {
+        var objs = JSON.parse(json);
+        var steps = [];
+        objs.forEach(obj => {
+            var type = obj['FormClass'];
+            //Decode the Form
+            var outform;
+            var objform = obj['form'];
+            switch (type) {
+                case "Select":
+                    var options = [];
+                    //Decode FormOptions
+                    objform.options.forEach(option => {
+                        options.push(new FormOption(option.text, option.value));
+                    });
+                    outform = new Select(objform.title, objform.text, options);
+                    break;
+                case "Information":
+                    outform = new Information(objform.title, objform.text);
+                    break;
+                case "Checkbox":
+                    outform = new Checkbox(objform.title, objform.text, objform.checked);
+                    break;
+                case "FormRange":
+                    outform = new FormRange(objform.title, objform.text, objform.min, objform.max, objform.step, objform.defaultValue);
+                    break;
+            }
+            //Add the finished Step to the array
+            steps.push(new Step(obj['id'], outform));
+        });
+        return steps;
+    }
+    static getFormClass(step) {
+        return step.form.constructor.name;
+    }
+}
 /// <reference path="Form.ts" />
 /// <reference path="StepHandler.ts" />
 /**
@@ -6,24 +80,19 @@
  * -extracts information from its Form
  * @class Step
  */
-var Step = (function () {
-    function Step(id, form, tags) {
-        this.id = id;
-        this.form = form;
-        this.tags = tags;
-    }
-    Step.prototype.createElement = function () {
+class Step {
+    createElement() {
         var wrapper = FormHelper.c('step', { id: this.id });
         var el = wrapper.append(this.form.createElement());
         return el;
-    };
-    Step.prototype.getElement = function () {
+    }
+    getElement() {
         return $('#' + this.id);
-    };
+    }
     ;
-    Step.prototype.getFormElement = function () {
+    getFormElement() {
         return $('#' + this.id + ' > ' + 'form');
-    };
+    }
     /**
      * Serializes the form data into a JS object
      *
@@ -31,8 +100,10 @@ var Step = (function () {
      *
      * @memberOf Step
      */
-    Step.prototype.getData = function () {
+    getData() {
         var o = {};
+        //Assign an ID to the Data object
+        o['id'] = this.id;
         var a = this.getFormElement().serializeArray();
         $.each(a, function () {
             if (o[this.name]) {
@@ -46,19 +117,21 @@ var Step = (function () {
             }
         });
         return o;
-    };
+    }
     ;
-    return Step;
-}());
+    constructor(id, form, tags) {
+        this.id = id;
+        this.form = form;
+        this.tags = tags;
+    }
+}
 var StepTag;
 (function (StepTag) {
     StepTag[StepTag["Dynamic"] = 0] = "Dynamic";
     StepTag[StepTag["DynamicallyAdded"] = 1] = "DynamicallyAdded";
 })(StepTag || (StepTag = {}));
 /// <reference path="Step.ts" />
-var StepHandler = (function () {
-    function StepHandler() {
-    }
+class StepHandler {
     /**
      * Loads the Steps from JSON, DB or from the Hardcoded Steps array
      * Filter out Steps marked with DynamicallyAdded tag
@@ -67,8 +140,7 @@ var StepHandler = (function () {
      * @param {Object} params
      * @returns {boolean}
      */
-    StepHandler.loadSteps = function (method, params) {
-        if (method === void 0) { method = LoadMethod.Local; }
+    static loadSteps(method = LoadMethod.Local, params) {
         switch (method) {
             case LoadMethod.DB:
                 throw new Error("Not implemented yet");
@@ -80,7 +152,7 @@ var StepHandler = (function () {
                 break;
         }
         return true;
-    };
+    }
     ;
     /**
      * Filter out Steps with the DynamicallyAdded tag
@@ -91,52 +163,51 @@ var StepHandler = (function () {
      *
      * @memberOf StepHandler
      */
-    StepHandler.filterDynAddedSteps = function (steps) {
-        return steps.filter(function (step) {
+    static filterDynAddedSteps(steps) {
+        return steps.filter((step) => {
             return !StepHandler.hasTag(step, StepTag.DynamicallyAdded);
         });
-    };
-    StepHandler.hasTag = function (step, tag) {
+    }
+    static hasTag(step, tag) {
         if (step.tags == undefined) {
             return false;
         }
         ;
         return step.tags.indexOf(tag) != -1;
-    };
+    }
     /**
      * Return a Step with the specified ID
      *
      * @param {string} id
      * @returns {Step} If not found, will return null
      */
-    StepHandler.getStep = function (id, queue) {
+    static getStep(id, queue) {
         if (queue) {
-            return StepHandler.StepQueue.filter(function (x) { return x.id === id; })[0];
+            return StepHandler.StepQueue.filter((x) => x.id === id)[0];
         }
         else {
-            return StepHandler.Steps.filter(function (x) { return x.id === id; })[0];
+            return StepHandler.Steps.filter((x) => x.id === id)[0];
         }
-    };
+    }
     ;
-    StepHandler.getStepsByIDContains = function (stepid, queue) {
-        if (queue === void 0) { queue = false; }
+    static getStepsByIDContains(stepid, queue = false) {
         if (queue) {
-            return StepHandler.StepQueue.filter(function (x) {
+            return StepHandler.StepQueue.filter((x) => {
                 x.id.indexOf(stepid) !== -1;
             });
         }
         else {
-            return StepHandler.Steps.filter(function (x) {
+            return StepHandler.Steps.filter((x) => {
                 x.id.indexOf(stepid) !== -1;
             });
         }
-    };
+    }
     /**
      * Get the Step which is currently in the DOM.
      *
      * @returns {Step}
      */
-    StepHandler.getCurrentStep = function () {
+    static getCurrentStep() {
         try {
             var id = $('step')
                 .attr('id');
@@ -145,14 +216,14 @@ var StepHandler = (function () {
             throw "No Step found in DOM at the moment; " + error;
         }
         return StepHandler.getStep(id, true);
-    };
+    }
     ;
     /**
      * First fn to be called on document.load
      *
      * @description Makes Wizard ready for the user
      */
-    StepHandler.Init = function () {
+    static Init() {
         //Check for the wizard anchor
         try {
             var $wizard = $('div#wizard');
@@ -177,14 +248,14 @@ var StepHandler = (function () {
         StepHandler.registerEvents();
         //Run StepLogic once to hide the Back button on start
         StepHandler.onStepChange();
-    };
+    }
     ;
     /**
      * Creates the Next and Reset buttons as jQuery element
      *
      * @returns {JQuery}
      */
-    StepHandler.createNav = function () {
+    static createNav() {
         var $nav = FormHelper.c("div", {
             id: "navigation",
             class: "clearfix"
@@ -199,7 +270,7 @@ var StepHandler = (function () {
             .text("Next >");
         return $nav.append($back)
             .append($next);
-    };
+    }
     ;
     /**
      * Update the Progress Bar according to the current state
@@ -209,12 +280,12 @@ var StepHandler = (function () {
      *
      * @memberOf StepHandler
      */
-    StepHandler.updateProgress = function () {
+    static updateProgress() {
         var current_step = StepHandler.getCurrentStep();
         var percent = ((StepHandler.StepQueue.indexOf(current_step) + 1) / StepHandler.StepQueue.length) * 100;
         var $progress_bar = $('#progress_bar');
         $progress_bar.width(percent + "%");
-    };
+    }
     /**
      * Creates the Progress Bar as jQuery element
      *
@@ -222,7 +293,7 @@ var StepHandler = (function () {
      *
      * @memberOf StepHandler
      */
-    StepHandler.createProgressBar = function () {
+    static createProgressBar() {
         var $progress = FormHelper.c('div', {
             id: "progress"
         });
@@ -230,25 +301,25 @@ var StepHandler = (function () {
             id: "progress_bar"
         });
         return $progress.append($progress_bar);
-    };
+    }
     /**
      * Register the events for the page
      *
      *
      * @memberOf StepHandler
      */
-    StepHandler.registerEvents = function () {
+    static registerEvents() {
         $('button#btn_next')
-            .click(function () {
+            .click(() => {
             StepHandler.onNextClicked();
             //onStepChange called in onStepComplete
         });
         $('button#btn_back')
-            .click(function () {
+            .click(() => {
             StepHandler.onBackClicked();
             StepHandler.onStepChange();
         });
-    };
+    }
     /**
      * Fires on Step change (Back or Next)
      * Contains functionality common for all Step changes
@@ -256,7 +327,7 @@ var StepHandler = (function () {
      *
      * @memberOf StepHandler
      */
-    StepHandler.onStepChange = function () {
+    static onStepChange() {
         //Update the Progress Bar
         StepHandler.updateProgress();
         //Update currentStepIndex
@@ -280,7 +351,7 @@ var StepHandler = (function () {
             $('#btn_next')
                 .show();
         }
-    };
+    }
     /**
      * Fired when the User clicks the Back button
      * Moves the User back one Step
@@ -289,7 +360,7 @@ var StepHandler = (function () {
      *
      * @memberOf StepHandler
      */
-    StepHandler.onBackClicked = function () {
+    static onBackClicked() {
         var step = StepHandler.getCurrentStep();
         //remove previous Step's data from StepData
         StepHandler.StepData.pop();
@@ -311,7 +382,7 @@ var StepHandler = (function () {
                 return;
             }
         }
-    };
+    }
     /**
      * Fired when the User clicks the Next button
      *
@@ -320,7 +391,7 @@ var StepHandler = (function () {
      *
      * @memberOf StepHandler
      */
-    StepHandler.onNextClicked = function () {
+    static onNextClicked() {
         var $next = $('button#btn_next');
         //Verify that data has been entered
         if (!StepHandler.getCurrentStep()
@@ -339,12 +410,12 @@ var StepHandler = (function () {
             $next.text('Confirm ?');
             StepHandler.readyForNext = true;
         }
-    };
+    }
     /**
      * An event that fires on Step completion/confirmation.
      * Handles the shifting of the StepQueue, displaying of next Step
      */
-    StepHandler.onStepComplete = function () {
+    static onStepComplete() {
         var step = StepHandler.getCurrentStep();
         //Extract and store the Step data
         StepHandler.StepData.push(step.getData());
@@ -361,7 +432,7 @@ var StepHandler = (function () {
         $currentStep.append(nextStep.form.createElement());
         //Next event is complex, calling the onStepChange here
         StepHandler.onStepChange();
-    };
+    }
     /**
      * Handles individual Step logic such as disabling or reordering of Steps in the StepQueue
      *
@@ -375,7 +446,7 @@ var StepHandler = (function () {
      *
      * @memberOf StepHandler
      */
-    StepHandler.StepLogic = function (step) {
+    static StepLogic(step) {
         //Store the current Step's data in a var for easier access
         var stepData = StepHandler.StepData[StepHandler.StepData.length - 1];
         switch (step.id) {
@@ -384,7 +455,7 @@ var StepHandler = (function () {
                 switch (use) {
                     case "gaming":
                         var gamingsteps = StepHandler.getStepsByIDContains("gaming");
-                        gamingsteps.forEach(function (step) {
+                        gamingsteps.forEach((step) => {
                             StepHandler.insertStep(step);
                         });
                         break;
@@ -399,7 +470,7 @@ var StepHandler = (function () {
             default:
                 break;
         }
-    };
+    }
     /**
      * Insert the Step into the StepQueue INTO THE SPECIFIED INDEX.
      * Meaning the Step will end up in the index you specified, other elements will be moved.
@@ -410,10 +481,9 @@ var StepHandler = (function () {
      *
      * @memberOf StepHandler
      */
-    StepHandler.insertStep = function (step, index) {
-        if (index === void 0) { index = StepHandler.currentStepIndex + 1; }
+    static insertStep(step, index = StepHandler.currentStepIndex + 1) {
         StepHandler.StepQueue.splice(index, 0, step);
-    };
+    }
     /**
      * Removes Dynamically Added Steps ahead of the specified index or, if not specified, the current Step
      *
@@ -422,22 +492,21 @@ var StepHandler = (function () {
      *
      * @memberOf StepHandler
      */
-    StepHandler.RemoveDynAddStepsAhead = function (index) {
-        if (index === void 0) { index = StepHandler.currentStepIndex; }
+    static RemoveDynAddStepsAhead(index = StepHandler.currentStepIndex) {
         //Get Steps ahead of the current Step
         var ahead = StepHandler.StepQueue.slice(StepHandler.currentStepIndex);
         //Find DynamicallyAdded Steps in the sliced array
-        var dynadded = ahead.filter(function (el) {
+        var dynadded = ahead.filter((el) => {
             return StepHandler.hasTag(el, StepTag.DynamicallyAdded);
         });
         //Remove these Steps from the StepQueue
-        dynadded.forEach(function (dynaddstep) {
+        dynadded.forEach((dynaddstep) => {
             var index = StepHandler.StepQueue.indexOf(dynaddstep);
             if (index > -1) {
                 StepHandler.StepQueue.splice(index, 1);
             }
         });
-    };
+    }
     /**
      * Called when User reaches first Step (step#start)
      *
@@ -445,8 +514,8 @@ var StepHandler = (function () {
      *
      * @memberOf StepHandler
      */
-    StepHandler.onStart = function () {
-    };
+    static onStart() {
+    }
     /**
      * Called when User reaches last Step (step#finish)
      *
@@ -454,10 +523,10 @@ var StepHandler = (function () {
      *
      * @memberOf StepHandler
      */
-    StepHandler.onFinish = function () {
+    static onFinish() {
         //TODO: Have a special button in Finish that calls submitData
         StepHandler.submitData();
-    };
+    }
     /**
      * Submits the data to the backend
      *
@@ -465,7 +534,7 @@ var StepHandler = (function () {
      *
      * @memberOf StepHandler
      */
-    StepHandler.submitData = function () {
+    static submitData() {
         var data = StepHandler.StepData;
         $.ajax({
             type: "POST",
@@ -474,19 +543,18 @@ var StepHandler = (function () {
             contentType: "application/json; charset=utf-8",
             dataType: "json",
         })
-            .then(function (success) {
+            .then((success) => {
             //do something
-        }, function (failure) {
+        }, (failure) => {
             //we failed, oh noes
         });
-    };
+    }
     /**
      * Reset the Wizard, either thru hard page reload or soft JS reset
      *
      * @param {boolean} [hard=false]
      */
-    StepHandler.Reset = function (hard) {
-        if (hard === void 0) { hard = false; }
+    static Reset(hard = false) {
         if (hard) {
             window.location.reload(true);
         }
@@ -504,10 +572,9 @@ var StepHandler = (function () {
             //Register UI events
             StepHandler.registerEvents();
         }
-    };
+    }
     ;
-    return StepHandler;
-}());
+}
 StepHandler.Steps = [];
 StepHandler.StepQueue = [];
 StepHandler.StepData = [];
@@ -520,93 +587,62 @@ var LoadMethod;
     LoadMethod[LoadMethod["Variable"] = 2] = "Variable";
 })(LoadMethod || (LoadMethod = {}));
 /// <reference path="StepHandler.ts" />
-var Select = (function () {
-    function Select(title, text, options) {
-        this.title = title;
-        this.text = text;
-        this.options = options;
-    }
-    Select.prototype.createElement = function () {
-        var $element = FormHelper.c('form');
-        var $title = FormHelper.c('div', {
-            id: "title"
-        }).text(this.title);
-        var $text = FormHelper.c('div', {
-            id: "text"
-        }).text(this.text);
-        $element.append($title).append($text);
+class Select {
+    createElement() {
+        var $element = FormHelper.createForm(this.title, this.text);
         var $select = FormHelper.c("select", {
             name: "select"
         });
-        this.options.forEach(function (el) {
+        this.options.forEach(el => {
             FormHelper.c("option", {
                 value: el.value
             }).text(el.text).appendTo($select);
         });
         $element.append($select);
         return $element;
-    };
-    return Select;
-}());
-var Checkbox = (function () {
-    function Checkbox(title, text, checked) {
-        if (checked === void 0) { checked = false; }
+    }
+    constructor(title, text, options) {
         this.title = title;
         this.text = text;
-        this.checked = checked;
+        this.options = options;
     }
-    Checkbox.prototype.createElement = function () {
-        var $element = FormHelper.c('form');
-        var $title = FormHelper.c('div', {
-            id: 'title'
-        }).text(this.title);
-        var $text = FormHelper.c('div', {
-            id: 'text'
-        }).text(this.text);
-        $element.append($title).append($text);
+}
+class FormOption {
+    constructor(text, value) {
+        this.text = text;
+        this.value = value;
+    }
+}
+class Checkbox {
+    createElement() {
+        var $element = FormHelper.createForm(this.title, this.text);
         var $check = FormHelper.c('input', {
             name: 'checkbox',
             type: 'checkbox'
         }).prop('checked', this.checked);
         $element.append($check);
         return $element;
-    };
+    }
     ;
-    return Checkbox;
-}());
-var Information = (function () {
-    function Information(title, text) {
+    constructor(title, text, checked = false) {
         this.title = title;
         this.text = text;
+        this.checked = checked;
     }
-    Information.prototype.createElement = function () {
-        var $element = FormHelper.c('form');
-        var $title = FormHelper.c('div', {
-            id: 'title'
-        }).text(this.title);
-        var $text = FormHelper.c('div', {
-            id: 'text'
-        }).text(this.text);
-        $element.append($title).append($text);
+}
+class Information {
+    createElement() {
+        var $element = FormHelper.createForm(this.title, this.text);
         return $element;
-    };
+    }
     ;
-    return Information;
-}());
-var FormRange = (function () {
-    function FormRange(title, text, min, max, step, defaultValue) {
-        if (min === void 0) { min = 0; }
-        if (max === void 0) { max = 30000; }
-        if (step === void 0) { step = 500; }
-        if (defaultValue === void 0) { defaultValue = 20000; }
+    constructor(title, text) {
         this.title = title;
         this.text = text;
-        this.min = min;
-        this.max = max;
-        this.step = step;
-        this.defaultValue = defaultValue;
     }
-    FormRange.prototype.createElement = function () {
+}
+class FormRange {
+    createElement() {
         var $element = FormHelper.createForm(this.title, this.text);
         //Fix for the pesky "this"" handling in JS :/
         var THIS = this;
@@ -620,13 +656,18 @@ var FormRange = (function () {
         });
         $element.append($range);
         return $element;
-    };
-    ;
-    return FormRange;
-}());
-var FormHelper = (function () {
-    function FormHelper() {
     }
+    ;
+    constructor(title, text, min = 0, max = 30000, step = 500, defaultValue = 20000) {
+        this.title = title;
+        this.text = text;
+        this.min = min;
+        this.max = max;
+        this.step = step;
+        this.defaultValue = defaultValue;
+    }
+}
+class FormHelper {
     /**
      * A wrapper for the jQuery element creation.
      * Faster and more compatible than pure jQuery
@@ -634,13 +675,13 @@ var FormHelper = (function () {
      * @param {Object} attributes Attributes of the element. Format: { attribute: "value" }
      * @returns {JQuery}
      */
-    FormHelper.c = function (element, attributes) {
+    static c(element, attributes) {
         var e = $(document.createElement(element));
         if (attributes) {
             e.attr(attributes);
         }
         return e;
-    };
+    }
     /**
      * Creates a basic Form with Title and Text and returns it as a JQuery object
      *
@@ -651,7 +692,7 @@ var FormHelper = (function () {
      *
      * @memberOf FormHelper
      */
-    FormHelper.createForm = function (title, text) {
+    static createForm(title, text) {
         var $element = FormHelper.c('form');
         var $title = FormHelper.c('div', {
             id: 'title'
@@ -661,18 +702,17 @@ var FormHelper = (function () {
         }).text(text);
         $element.append($title).append($text);
         return $element;
-    };
-    return FormHelper;
-}());
+    }
+}
 /// <reference path="StepHandler.ts" />
 //Manually load the steps for now
 var steps = [];
 steps.push(new Step("start", new Information("Hello", "Welcome to Wizard")));
 steps.push(new Step("price", new FormRange("Price", "How much should the computer cost AT MOST?")));
 steps.push(new Step("use", new Select("Use", "What are you going to use the Computer for?", [
-    new Option("Gaming", "gaming"),
-    new Option("Office", "office"),
-    new Option("Multimedia", "multimedia")
+    new FormOption("Gaming", "gaming"),
+    new FormOption("Office", "office"),
+    new FormOption("Multimedia", "multimedia")
 ]), [StepTag.Dynamic]));
 steps.push(new Step("gaming_test", new Information("DynAdd test - Gaming", "DynAdd Test - Gaming"), [StepTag.DynamicallyAdded]));
 steps.push(new Step("misc_wifi", new Checkbox("WiFi", "Do you want WiFi in your computer?", true)));
