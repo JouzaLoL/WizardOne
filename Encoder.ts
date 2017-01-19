@@ -17,7 +17,8 @@ class Encoder {
      */
     static EncodeSteps(steps: Step[]): string {
         var readySteps: Step[] = new Array();
-        var steps: Step[] = new Array().concat(steps);
+        //Dirty error fix
+        var steps: Step[] = new Array().concat(steps); 
         steps.forEach(step => {
             //Add information about Form Class
             var formclass = Encoder.getFormClass(step);
@@ -72,7 +73,7 @@ class Encoder {
                 case "FormRange":
                     outform = new FormRange(objform.title, objform.text, objform.min, objform.max, objform.step, objform.defaultValue);
                     break;
-                    
+
             }
 
             //Add the finished Step to the array

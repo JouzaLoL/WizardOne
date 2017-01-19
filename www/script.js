@@ -16,6 +16,7 @@ class Encoder {
      */
     static EncodeSteps(steps) {
         var readySteps = new Array();
+        //Dirty error fix
         var steps = new Array().concat(steps);
         steps.forEach(step => {
             //Add information about Form Class
