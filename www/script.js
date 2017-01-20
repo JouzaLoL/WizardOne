@@ -134,20 +134,23 @@ var StepTag;
 /// <reference path="Step.ts" />
 class StepHandler {
     /**
-     * Loads the Steps from JSON, DB or from the Hardcoded Steps array
-     * Filter out Steps marked with DynamicallyAdded tag
-     * TODO: Make the whole function support promises, because DB access is async
+     * Loads the Steps using a GET request, or from a local encoded array
+     * Filters out Steps marked with DynamicallyAdded tag
+     * TODO: Make the whole function support promises (async GET)
      * @param {LoadMethod} method
      * @param {Object} params
      * @returns {boolean}
      */
     static loadSteps(method = LoadMethod.Local, params) {
         switch (method) {
-            case LoadMethod.DB:
+            case LoadMethod.GET:
                 throw new Error("Not implemented yet");
-            case LoadMethod.Variable:
-                StepHandler.Steps = params;
-                StepHandler.StepQueue = StepHandler.filterDynAddedSteps(params);
+            //TODO: Make a GET request to the database
+            case LoadMethod.Local:
+                var steps = Encoder.DecodeSteps(params);
+                var filteredSteps = StepHandler.filterDynAddedSteps(steps);
+                StepHandler.Steps = steps;
+                StepHandler.StepQueue = filteredSteps;
                 break;
             default:
                 break;
@@ -169,6 +172,16 @@ class StepHandler {
             return !StepHandler.hasTag(step, StepTag.DynamicallyAdded);
         });
     }
+    /**
+     * Checks if a Step has the Tag specified
+     *
+     * @static
+     * @param {Step} step
+     * @param {StepTag} tag
+     * @returns {boolean}
+     *
+     * @memberOf StepHandler
+     */
     static hasTag(step, tag) {
         if (step.tags == undefined) {
             return false;
@@ -191,15 +204,25 @@ class StepHandler {
         }
     }
     ;
-    static getStepsByIDContains(stepid, queue = false) {
-        if (queue) {
+    /**
+     * Get all Steps whose ID contains the specified string
+     *
+     * @static
+     * @param {string} id
+     * @param {boolean} [queue=false]
+     * @returns {Step[]}
+     *
+     * @memberOf StepHandler
+     */
+    static getStepsByIDContains(id, fromqueue = false) {
+        if (fromqueue) {
             return StepHandler.StepQueue.filter((x) => {
-                x.id.indexOf(stepid) !== -1;
+                x.id.indexOf(id) !== -1;
             });
         }
         else {
             return StepHandler.Steps.filter((x) => {
-                x.id.indexOf(stepid) !== -1;
+                x.id.indexOf(id) !== -1;
             });
         }
     }
@@ -236,8 +259,6 @@ class StepHandler {
         if (StepHandler.Steps[0] === null) {
             StepHandler.loadSteps();
         }
-        //Populate the StepQueue
-        StepHandler.StepQueue = StepHandler.Steps;
         //Initialize the first Step
         var $initStep = StepHandler.Steps[0].createElement();
         $wizard.append($initStep);
@@ -252,9 +273,9 @@ class StepHandler {
     }
     ;
     /**
-     * Creates the Next and Reset buttons as jQuery element
+     * Creates the Next and Reset buttons
      *
-     * @returns {JQuery}
+     * @returns {JQuery} a JQuery element containing the Next and Reset buttons
      */
     static createNav() {
         var $nav = FormHelper.c("div", {
@@ -583,9 +604,8 @@ StepHandler.currentStepIndex = 0;
 StepHandler.readyForNext = false;
 var LoadMethod;
 (function (LoadMethod) {
-    LoadMethod[LoadMethod["DB"] = 0] = "DB";
+    LoadMethod[LoadMethod["GET"] = 0] = "GET";
     LoadMethod[LoadMethod["Local"] = 1] = "Local";
-    LoadMethod[LoadMethod["Variable"] = 2] = "Variable";
 })(LoadMethod || (LoadMethod = {}));
 /// <reference path="StepHandler.ts" />
 class Select {
@@ -718,6 +738,8 @@ steps.push(new Step("use", new Select("Use", "What are you going to use the Comp
 steps.push(new Step("gaming_test", new Information("DynAdd test - Gaming", "DynAdd Test - Gaming"), [StepTag.DynamicallyAdded]));
 steps.push(new Step("misc_wifi", new Checkbox("WiFi", "Do you want WiFi in your computer?", true)));
 steps.push(new Step("finish", new Information("Finished", "We are finished")));
-StepHandler.loadSteps(LoadMethod.Variable, steps);
+//StepHandler.loadSteps(LoadMethod.Variable, steps);
+var encoded = Encoder.EncodeSteps(steps);
+StepHandler.loadSteps(LoadMethod.Local, encoded);
 $(document)
     .ready(StepHandler.Init);

@@ -26,7 +26,9 @@ steps.push(
     new Step("finish",
         new Information("Finished", "We are finished")));
 
-StepHandler.loadSteps(LoadMethod.Variable, steps);
+//StepHandler.loadSteps(LoadMethod.Variable, steps);
+var encoded = Encoder.EncodeSteps(steps);
+StepHandler.loadSteps(LoadMethod.Local, encoded);
 
 $(document)
     .ready(StepHandler.Init);

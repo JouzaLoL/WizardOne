@@ -7,21 +7,23 @@ class StepHandler {
     static currentStepIndex: number = 0;
 
     /**
-     * Loads the Steps from JSON, DB or from the Hardcoded Steps array
-     * Filter out Steps marked with DynamicallyAdded tag
-     * TODO: Make the whole function support promises, because DB access is async
+     * Loads the Steps using a GET request, or from a local encoded array
+     * Filters out Steps marked with DynamicallyAdded tag
+     * TODO: Make the whole function support promises (async GET)
      * @param {LoadMethod} method
      * @param {Object} params
      * @returns {boolean}
      */
     static loadSteps(method: LoadMethod = LoadMethod.Local, params?: any): boolean {
         switch (method) {
-
-            case LoadMethod.DB:
+            case LoadMethod.GET:
                 throw new Error("Not implemented yet");
-            case LoadMethod.Variable:
-                StepHandler.Steps = params;
-                StepHandler.StepQueue = StepHandler.filterDynAddedSteps(params);
+                //TODO: Make a GET request to the database
+            case LoadMethod.Local:
+                var steps = Encoder.DecodeSteps(params);
+                var filteredSteps = StepHandler.filterDynAddedSteps(steps);
+                StepHandler.Steps = steps;
+                StepHandler.StepQueue = filteredSteps;
                 break;
             default:
                 break;
@@ -46,6 +48,16 @@ class StepHandler {
         });
     }
 
+    /**
+     * Checks if a Step has the Tag specified
+     * 
+     * @static
+     * @param {Step} step
+     * @param {StepTag} tag
+     * @returns {boolean}
+     * 
+     * @memberOf StepHandler
+     */
     static hasTag(step: Step, tag: StepTag): boolean {
         if (step.tags == undefined) {
             return false
@@ -67,14 +79,25 @@ class StepHandler {
         }
     };
 
-    static getStepsByIDContains(stepid: string, queue: boolean = false): Step[] {
-        if (queue) {
+    
+    /**
+     * Get all Steps whose ID contains the specified string
+     * 
+     * @static
+     * @param {string} id
+     * @param {boolean} [queue=false]
+     * @returns {Step[]}
+     * 
+     * @memberOf StepHandler
+     */
+    static getStepsByIDContains(id: string, fromqueue: boolean = false): Step[] {
+        if (fromqueue) {
             return StepHandler.StepQueue.filter((x: Step) => {
-                x.id.indexOf(stepid) !== -1
+                x.id.indexOf(id) !== -1
             });
         } else {
             return StepHandler.Steps.filter((x: Step) => {
-                x.id.indexOf(stepid) !== -1
+                x.id.indexOf(id) !== -1
             });
         }
     }
@@ -110,10 +133,8 @@ class StepHandler {
         //Check if Steps are loaded
         if (StepHandler.Steps[0] === null) {
             StepHandler.loadSteps();
-            //TODO: loadSteps().then(success{StepQueue = Steps;}
+            //TODO: loadSteps().then(success{StepQueue = Steps;};
         }
-        //Populate the StepQueue
-        StepHandler.StepQueue = StepHandler.Steps;
 
         //Initialize the first Step
         var $initStep = StepHandler.Steps[0].createElement();
@@ -133,9 +154,9 @@ class StepHandler {
     };
 
     /**
-     * Creates the Next and Reset buttons as jQuery element 
+     * Creates the Next and Reset buttons
      * 
-     * @returns {JQuery}
+     * @returns {JQuery} a JQuery element containing the Next and Reset buttons
      */
     static createNav(): JQuery {
         var $nav = FormHelper.c("div", {
@@ -493,8 +514,8 @@ class StepHandler {
     };
 }
 
+
 enum LoadMethod {
-    DB,
-    Local,
-    Variable
+    GET,
+    Local
 }
