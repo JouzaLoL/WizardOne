@@ -10,9 +10,9 @@ steps.push(
 steps.push(
     new Step("use",
         new Select("Use", "What are you going to use the Computer for?", [
-            new Option("Gaming", "gaming"),
-            new Option("Office", "office"),
-            new Option("Multimedia", "multimedia")
+            new FormOption("Gaming", "gaming"),
+            new FormOption("Office", "office"),
+            new FormOption("Multimedia", "multimedia")
         ]), [StepTag.Dynamic]));
 steps.push(
     new Step("gaming_test",
@@ -26,7 +26,9 @@ steps.push(
     new Step("finish",
         new Information("Finished", "We are finished")));
 
-StepHandler.loadSteps(LoadMethod.Variable, steps);
+//StepHandler.loadSteps(LoadMethod.Variable, steps);
+var encoded = Encoder.EncodeSteps(steps);
+StepHandler.loadSteps(LoadMethod.Local, encoded);
 
 $(document)
     .ready(StepHandler.Init);

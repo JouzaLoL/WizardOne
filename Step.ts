@@ -12,7 +12,7 @@ class Step {
     form: Form;
     tags: StepTag[];
     createElement(): JQuery {
-        var wrapper = FormHelper.c('step', {id: this.id});
+        var wrapper = FormHelper.c('step', { id: this.id });
         var el = wrapper.append(this.form.createElement());
         return el;
     }
@@ -31,6 +31,8 @@ class Step {
      */
     getData(): Object {
         var o = {};
+        //Assign an ID to the Data object
+        o['id'] = this.id;
         var a = this.getFormElement().serializeArray();
         $.each(a, function () {
             if (o[this.name]) {
@@ -42,8 +44,6 @@ class Step {
                 o[this.name] = this.value || '';
             }
         });
-        //Assign an ID to the Data object
-        o['id'] = this.id;
         return o;
     };
     constructor(id: string, form: Form, tags?: StepTag[]) {

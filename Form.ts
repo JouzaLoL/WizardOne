@@ -13,17 +13,9 @@ interface Form {
 class Select implements Form {
     title: string;
     text: string;
-    options: Option[];
+    options: FormOption[];
     createElement(): JQuery {
-        var $element = FormHelper.c('form');
-
-        var $title = FormHelper.c('div', {
-            id: "title"
-        }).text(this.title);
-        var $text = FormHelper.c('div', {
-            id: "text"
-        }).text(this.text);
-        $element.append($title).append($text);
+        var $element = FormHelper.createForm(this.title, this.text);
 
         var $select = FormHelper.c("select", {
             name: "select"
@@ -37,16 +29,20 @@ class Select implements Form {
 
         return $element;
     }
-    constructor(title: string, text: string, options: Option[]) {
+    constructor(title: string, text: string, options: FormOption[]) {
         this.title = title;
         this.text = text;
         this.options = options;
     }
 }
 
-interface Option {
+class FormOption {
     text: string;
     value: string;
+    constructor(text: string, value: string) {
+        this.text = text;
+        this.value = value;
+    }
 }
 
 class Checkbox implements Form {
@@ -55,15 +51,7 @@ class Checkbox implements Form {
     checked: boolean;
     createElement(): JQuery {
 
-        var $element = FormHelper.c('form');
-
-        var $title = FormHelper.c('div', {
-            id: 'title'
-        }).text(this.title);
-        var $text = FormHelper.c('div', {
-            id: 'text'
-        }).text(this.text);
-        $element.append($title).append($text);
+        var $element = FormHelper.createForm(this.title, this.text);
 
         var $check = FormHelper.c('input', {
             name: 'checkbox',
@@ -85,15 +73,7 @@ class Information implements Form {
     text: string;
     createElement(): JQuery {
 
-        var $element = FormHelper.c('form');
-
-        var $title = FormHelper.c('div', {
-            id: 'title'
-        }).text(this.title);
-        var $text = FormHelper.c('div', {
-            id: 'text'
-        }).text(this.text);
-        $element.append($title).append($text);
+        var $element = FormHelper.createForm(this.title, this.text);
 
         return $element;
     };
