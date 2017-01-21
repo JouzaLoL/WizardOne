@@ -3,7 +3,7 @@
 class StepHandler {
     static Steps: Step[] = [];
     static StepQueue: Step[] = [];
-    static StepData: Object[] = [];
+    static StepData: IStepData[] = [];
     static currentStepIndex: number = 0;
 
     /**
@@ -18,7 +18,7 @@ class StepHandler {
         switch (method) {
             case LoadMethod.GET:
                 throw new Error("Not implemented yet");
-                //TODO: Make a GET request to the database
+            //TODO: Make a GET request to the database
             case LoadMethod.Local:
                 var steps = Encoder.DecodeSteps(params);
                 var filteredSteps = StepHandler.filterDynAddedSteps(steps);
@@ -79,7 +79,7 @@ class StepHandler {
         }
     };
 
-    
+
     /**
      * Get all Steps whose ID contains the specified string
      * 
@@ -93,11 +93,11 @@ class StepHandler {
     static getStepsByIDContains(id: string, fromqueue: boolean = false): Step[] {
         if (fromqueue) {
             return StepHandler.StepQueue.filter((x: Step) => {
-                x.id.indexOf(id) !== -1
+                return x.id.indexOf(id) !== -1;
             });
         } else {
             return StepHandler.Steps.filter((x: Step) => {
-                x.id.indexOf(id) !== -1
+                return x.id.indexOf(id) !== -1;
             });
         }
     }
@@ -308,13 +308,7 @@ class StepHandler {
     static onNextClicked() {
         var $next = $('button#btn_next');
 
-        //Verify that data has been entered
-        if (!StepHandler.getCurrentStep()
-            .getData()) {
-            //TODO: Display a fancy warning
-            $next.text('Please fill out the form first.')
-            return;
-        }
+        //No need to verify data since there will always be default data
 
         //Confirm functionality
         if (StepHandler.readyForNext) {
@@ -356,38 +350,28 @@ class StepHandler {
     }
 
     /**
-     * Handles individual Step logic such as disabling or reordering of Steps in the StepQueue
+     * Handles individual Step logic
      * 
-     * @param {string} stepID
-     */
-    /**
-     * 
-     * 
+     * @param {string} step
      * @static
-     * @param {Step} step
      * 
      * @memberOf StepHandler
      */
     static StepLogic(step: Step) {
         //Store the current Step's data in a var for easier access
-        var stepData = StepHandler.StepData[StepHandler.StepData.length - 1];
+        var stepData: IStepData = StepHandler.StepData[StepHandler.StepData.length - 1];
         switch (step.id) {
             case "use":
-                var use = stepData['select'];
+                var use = stepData.data['select'];
                 switch (use) {
-                    case "gaming":
-                        var gamingsteps = StepHandler.getStepsByIDContains("gaming");
-                        gamingsteps.forEach((step) => {
+                    //By default, add all DynamicallyAdded Steps whose name contains the Selected name
+                    default:
+                        var usesteps = StepHandler.getStepsByIDContains(use);
+                        usesteps.forEach((step) => {
                             StepHandler.insertStep(step);
                         });
                         break;
                 }
-                break;
-            case "finish": //Wizard is complete
-                StepHandler.onFinish();
-                break;
-            case "start": //Wizard is complete
-                StepHandler.onStart();
                 break;
             default:
                 break;
@@ -436,25 +420,20 @@ class StepHandler {
     }
 
     /**
-     * Called when User reaches first Step (step#start)
-     * 
-     * @static
-     * 
-     * @memberOf StepHandler
-     */
-    static onStart() {
-
-    }
-
-    /**
-     * Called when User reaches last Step (step#finish)
+     * Called by the Finish button
      * 
      * @static
      * 
      * @memberOf StepHandler
      */
     static onFinish() {
-        //TODO: Have a special button in Finish that calls submitData
+
+        //Finalize the Array with the Finish StepData
+        var finishdata = StepHandler.getCurrentStep()
+            .getData();
+        StepHandler.StepData.push(finishdata);
+
+        //Submit the Data to the BE
         StepHandler.submitData();
     }
 
@@ -481,39 +460,7 @@ class StepHandler {
                 //we failed, oh noes
             });
     }
-
-    /**
-     * Reset the Wizard, either thru hard page reload or soft JS reset
-     * 
-     * @param {boolean} [hard=false]
-     */
-    static Reset(hard: boolean = false) {
-        if (hard) {
-            window.location.reload(true);
-        } else {
-            var $wizard = $('div#wizard');
-
-            //Reset the StepQueue
-            StepHandler.StepQueue = StepHandler.Steps;
-
-            //Reset the whole Wizard
-            $wizard.empty();
-
-            //Append init Step
-            var $initStep = StepHandler.Steps[0].createElement();
-            $wizard.append($initStep);
-
-            //Create and append Navigation
-            $wizard.append(StepHandler.createNav());
-
-            //Register UI events
-            StepHandler.registerEvents();
-
-            //TODO: Create Progress Bar
-        }
-    };
 }
-
 
 enum LoadMethod {
     GET,

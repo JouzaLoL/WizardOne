@@ -18,7 +18,7 @@ class Encoder {
     static EncodeSteps(steps: Step[]): string {
         var readySteps: Step[] = new Array();
         //Dirty error fix
-        var steps: Step[] = new Array().concat(steps); 
+        var steps: Step[] = new Array().concat(steps);
         steps.forEach(step => {
             //Add information about Form Class
             var formclass = Encoder.getFormClass(step);
@@ -76,8 +76,23 @@ class Encoder {
 
             }
 
+            //Reconstruct the Step's Tags
+            var recontags: StepTag[] = [];
+            var objtags = obj['tags'];
+            
+            if (objtags != undefined) {
+                objtags.forEach(tagnumber => {
+                    //Get String of the Enum by index
+                    var tagstring: string = StepTag[tagnumber];
+                    //Get the Enum by string
+                    var tagenum: StepTag = StepTag[tagstring];
+                    //Add it to the Array
+                    recontags.push(tagenum);
+                });
+            }
+
             //Add the finished Step to the array
-            steps.push(new Step(obj['id'], outform));
+            steps.push(new Step(obj['id'], outform, recontags));
         });
 
         return steps;
