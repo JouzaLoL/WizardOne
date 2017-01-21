@@ -185,10 +185,10 @@ class StepHandler {
      * @memberOf StepHandler
      */
     static updateProgress() {
-        var current_step = StepHandler.getCurrentStep();
-        var percent = ((StepHandler.StepQueue.indexOf(current_step) + 1) / StepHandler.StepQueue.length) * 100;
-        var $progress_bar = $('#progress_bar');
-        $progress_bar.width(percent + "%");
+        var currentStep = StepHandler.getCurrentStep();
+        var percent = ((StepHandler.StepQueue.indexOf(currentStep) + 1) / StepHandler.StepQueue.length) * 100;
+        var $progressBar = $('#progress_bar');
+        $progressBar.width(percent + "%");
     }
 
     /**
@@ -203,11 +203,11 @@ class StepHandler {
             id: "progress"
         });
 
-        var $progress_bar = FormHelper.c('div', {
+        var $progressBar = FormHelper.c('div', {
             id: "progress_bar"
         });
 
-        return $progress.append($progress_bar);
+        return $progress.append($progressBar);
     }
 
     /**
@@ -277,7 +277,6 @@ class StepHandler {
         // Move to previous Step
         var prevStep = StepHandler.StepQueue[StepHandler.currentStepIndex - 1];
         var $currentStep = step.getElement();
-        var $currentForm = step.getFormElement();
         $currentStep.attr('id', prevStep.id);
         $currentStep.empty();
         $currentStep.append(prevStep.form.createElement());
@@ -340,7 +339,6 @@ class StepHandler {
         // Move to next step
         var nextStep = StepHandler.StepQueue[StepHandler.currentStepIndex + 1];
         var $currentStep = step.getElement();
-        var $currentForm = step.getFormElement();
         $currentStep.attr('id', nextStep.id);
         $currentStep.empty();
         $currentStep.append(nextStep.form.createElement());
@@ -367,8 +365,8 @@ class StepHandler {
                     // By default, add all DynamicallyAdded Steps whose name contains the Selected name
                     default:
                         var usesteps = StepHandler.getStepsByIDContains(use);
-                        usesteps.forEach((step) => {
-                            StepHandler.insertStep(step);
+                        usesteps.forEach((usestep) => {
+                            StepHandler.insertStep(usestep);
                         });
                         break;
                 }
@@ -412,9 +410,9 @@ class StepHandler {
 
         // Remove these Steps from the StepQueue
         dynadded.forEach((dynaddstep) => {
-            var index = StepHandler.StepQueue.indexOf(dynaddstep);
-            if (index > -1) {
-                StepHandler.StepQueue.splice(index, 1);
+            var dynaddstepindex = StepHandler.StepQueue.indexOf(dynaddstep);
+            if (dynaddstepindex > -1) {
+                StepHandler.StepQueue.splice(dynaddstepindex, 1);
             }
         });
     }
