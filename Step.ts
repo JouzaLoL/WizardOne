@@ -29,22 +29,29 @@ class Step {
      * 
      * @memberOf Step
      */
-    getData(): Object {
-        var o = {};
-        //Assign an ID to the Data object
-        o['id'] = this.id;
+    getData(): IStepData {
         var a = this.getFormElement().serializeArray();
+
+        var stepData: IStepData = {
+            id: this.id,
+            tags: this.tags,
+            data: {}
+        };
+
         $.each(a, function () {
-            if (o[this.name]) {
-                if (!o[this.name].push) {
-                    o[this.name] = [o[this.name]];
+            if (stepData.data[this.name]) {
+                if (!stepData.data[this.name].push) {
+                    stepData.data[this.name] = [stepData.data[this.name]];
                 }
-                o[this.name].push(this.value || '');
+                stepData.data[this.name].push(this.value || '');
             } else {
-                o[this.name] = this.value || '';
+                stepData.data[this.name] = this.value || '';
             }
         });
-        return o;
+        
+        return stepData;
+
+
     };
     constructor(id: string, form: Form, tags?: StepTag[]) {
         this.id = id;
@@ -56,4 +63,10 @@ class Step {
 enum StepTag {
     Dynamic,
     DynamicallyAdded
+}
+
+interface IStepData {
+    id: string;
+    tags: StepTag[];
+    data: Object;
 }
