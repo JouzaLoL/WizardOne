@@ -1,5 +1,5 @@
 /// <reference path="StepHandler.ts" />
-//Manually load the steps for now
+// Manually load the steps for now
 var steps: Step[] = [];
 steps.push(
     new Step("start",
@@ -27,7 +27,7 @@ steps.push(
         new Information("Finished", "We are finished")));
 
 
-//StepHandler.loadSteps(LoadMethod.Variable, steps);
+// StepHandler.loadSteps(LoadMethod.Variable, steps);
 var encoded = Encoder.EncodeSteps(steps);
 StepHandler.loadSteps(LoadMethod.Local, encoded);
 

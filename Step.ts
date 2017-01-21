@@ -9,7 +9,7 @@
  */
 class Step {
     id: string;
-    form: Form;
+    form: IForm;
     tags: StepTag[];
     createElement(): JQuery {
         var wrapper = FormHelper.c('step', { id: this.id });
@@ -48,12 +48,11 @@ class Step {
                 stepData.data[this.name] = this.value || '';
             }
         });
-        
         return stepData;
 
 
     };
-    constructor(id: string, form: Form, tags?: StepTag[]) {
+    constructor(id: string, form: IForm, tags?: StepTag[]) {
         this.id = id;
         this.form = form;
         this.tags = tags;
