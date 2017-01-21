@@ -64,8 +64,21 @@ class Encoder {
                     outform = new FormRange(objform.title, objform.text, objform.min, objform.max, objform.step, objform.defaultValue);
                     break;
             }
+            //Reconstruct the Step's Tags
+            var recontags = [];
+            var objtags = obj['tags'];
+            if (objtags != undefined) {
+                objtags.forEach(tagnumber => {
+                    //Get String of the Enum by index
+                    var tagstring = StepTag[tagnumber];
+                    //Get the Enum by string
+                    var tagenum = StepTag[tagstring];
+                    //Add it to the Array
+                    recontags.push(tagenum);
+                });
+            }
             //Add the finished Step to the array
-            steps.push(new Step(obj['id'], outform));
+            steps.push(new Step(obj['id'], outform, recontags));
         });
         return steps;
     }
@@ -102,22 +115,24 @@ class Step {
      * @memberOf Step
      */
     getData() {
-        var o = {};
-        //Assign an ID to the Data object
-        o['id'] = this.id;
         var a = this.getFormElement().serializeArray();
+        var stepData = {
+            id: this.id,
+            tags: this.tags,
+            data: {}
+        };
         $.each(a, function () {
-            if (o[this.name]) {
-                if (!o[this.name].push) {
-                    o[this.name] = [o[this.name]];
+            if (stepData.data[this.name]) {
+                if (!stepData.data[this.name].push) {
+                    stepData.data[this.name] = [stepData.data[this.name]];
                 }
-                o[this.name].push(this.value || '');
+                stepData.data[this.name].push(this.value || '');
             }
             else {
-                o[this.name] = this.value || '';
+                stepData.data[this.name] = this.value || '';
             }
         });
-        return o;
+        return stepData;
     }
     ;
     constructor(id, form, tags) {
@@ -217,12 +232,12 @@ class StepHandler {
     static getStepsByIDContains(id, fromqueue = false) {
         if (fromqueue) {
             return StepHandler.StepQueue.filter((x) => {
-                x.id.indexOf(id) !== -1;
+                return x.id.indexOf(id) !== -1;
             });
         }
         else {
             return StepHandler.Steps.filter((x) => {
-                x.id.indexOf(id) !== -1;
+                return x.id.indexOf(id) !== -1;
             });
         }
     }
@@ -415,13 +430,7 @@ class StepHandler {
      */
     static onNextClicked() {
         var $next = $('button#btn_next');
-        //Verify that data has been entered
-        if (!StepHandler.getCurrentStep()
-            .getData()) {
-            //TODO: Display a fancy warning
-            $next.text('Please fill out the form first.');
-            return;
-        }
+        //No need to verify data since there will always be default data
         //Confirm functionality
         if (StepHandler.readyForNext) {
             $next.text('Next >');
@@ -456,15 +465,10 @@ class StepHandler {
         StepHandler.onStepChange();
     }
     /**
-     * Handles individual Step logic such as disabling or reordering of Steps in the StepQueue
+     * Handles individual Step logic
      *
-     * @param {string} stepID
-     */
-    /**
-     *
-     *
+     * @param {string} step
      * @static
-     * @param {Step} step
      *
      * @memberOf StepHandler
      */
@@ -473,21 +477,16 @@ class StepHandler {
         var stepData = StepHandler.StepData[StepHandler.StepData.length - 1];
         switch (step.id) {
             case "use":
-                var use = stepData['select'];
+                var use = stepData.data['select'];
                 switch (use) {
-                    case "gaming":
-                        var gamingsteps = StepHandler.getStepsByIDContains("gaming");
-                        gamingsteps.forEach((step) => {
+                    //By default, add all DynamicallyAdded Steps whose name contains the Selected name
+                    default:
+                        var usesteps = StepHandler.getStepsByIDContains(use);
+                        usesteps.forEach((step) => {
                             StepHandler.insertStep(step);
                         });
                         break;
                 }
-                break;
-            case "finish":
-                StepHandler.onFinish();
-                break;
-            case "start":
-                StepHandler.onStart();
                 break;
             default:
                 break;
@@ -530,23 +529,18 @@ class StepHandler {
         });
     }
     /**
-     * Called when User reaches first Step (step#start)
-     *
-     * @static
-     *
-     * @memberOf StepHandler
-     */
-    static onStart() {
-    }
-    /**
-     * Called when User reaches last Step (step#finish)
+     * Called by the Finish button
      *
      * @static
      *
      * @memberOf StepHandler
      */
     static onFinish() {
-        //TODO: Have a special button in Finish that calls submitData
+        //Finalize the Array with the Finish StepData
+        var finishdata = StepHandler.getCurrentStep()
+            .getData();
+        StepHandler.StepData.push(finishdata);
+        //Submit the Data to the BE
         StepHandler.submitData();
     }
     /**
@@ -571,31 +565,6 @@ class StepHandler {
             //we failed, oh noes
         });
     }
-    /**
-     * Reset the Wizard, either thru hard page reload or soft JS reset
-     *
-     * @param {boolean} [hard=false]
-     */
-    static Reset(hard = false) {
-        if (hard) {
-            window.location.reload(true);
-        }
-        else {
-            var $wizard = $('div#wizard');
-            //Reset the StepQueue
-            StepHandler.StepQueue = StepHandler.Steps;
-            //Reset the whole Wizard
-            $wizard.empty();
-            //Append init Step
-            var $initStep = StepHandler.Steps[0].createElement();
-            $wizard.append($initStep);
-            //Create and append Navigation
-            $wizard.append(StepHandler.createNav());
-            //Register UI events
-            StepHandler.registerEvents();
-        }
-    }
-    ;
 }
 StepHandler.Steps = [];
 StepHandler.StepQueue = [];

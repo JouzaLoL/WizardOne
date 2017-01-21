@@ -16,7 +16,7 @@ steps.push(
         ]), [StepTag.Dynamic]));
 steps.push(
     new Step("gaming_test",
-        new Information("DynAdd test - Gaming","DynAdd Test - Gaming"),
+        new Information("DynAdd test - Gaming", "DynAdd Test - Gaming"),
         [StepTag.DynamicallyAdded])
 );
 steps.push(
@@ -25,6 +25,7 @@ steps.push(
 steps.push(
     new Step("finish",
         new Information("Finished", "We are finished")));
+
 
 //StepHandler.loadSteps(LoadMethod.Variable, steps);
 var encoded = Encoder.EncodeSteps(steps);
