@@ -1,0 +1,20 @@
+{
+    "rules": {
+        "semicolon": [true],
+        "no-consecutive-blank-lines": [true, 2],
+        "interface-name": [true, "always-prefix"],
+        "comment-format": [true, "check-space", "check-uppercase"],
+        "no-trailing-whitespace": true,
+        "no-empty": true,
+        "curly": true,
+        "no-duplicate-variable": true,
+        "no-shadowed-variable": true,
+        "no-switch-case-fall-through": true,
+        "no-unused-new": true,
+        "no-unused-variable": [true],
+        "class-name": true,
+        // "space-before-function-paren": [true, "always"]
+        "variable-name": [true, "check-format", "allow-leading-underscore", "allow-pascal-case"]
+        // "whitespace": [true, "check-branch", "check-decl", "check-operator"]
+    }
+}

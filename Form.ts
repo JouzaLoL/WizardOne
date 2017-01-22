@@ -1,16 +1,16 @@
 /// <reference path="StepHandler.ts" />
 /**
- * Form and its derivates are used to generate the Form element
+ * IForm and its derivates are used to generate the Form element
  *
- * @interface Form
+ * @interface IForm
  */
-interface Form {
+interface IForm {
     title: string;
     text: string;
     createElement(): JQuery;
 }
 
-class Select implements Form {
+class Select implements IForm {
     title: string;
     text: string;
     options: FormOption[];
@@ -45,7 +45,7 @@ class FormOption {
     }
 }
 
-class Checkbox implements Form {
+class Checkbox implements IForm {
     title: string;
     text: string;
     checked: boolean;
@@ -68,7 +68,7 @@ class Checkbox implements Form {
     }
 }
 
-class Information implements Form {
+class Information implements IForm {
     title: string;
     text: string;
     createElement(): JQuery {
@@ -83,7 +83,7 @@ class Information implements Form {
     }
 }
 
-class FormRange implements Form {
+class FormRange implements IForm {
     title: string;
     text: string;
     value: number;
@@ -94,7 +94,7 @@ class FormRange implements Form {
     createElement(): JQuery {
 
         var $element = FormHelper.createForm(this.title, this.text);
-        //Fix for the pesky "this"" handling in JS :/
+        // Fix for the pesky "this"" handling in JS :/
         var THIS = this;
         var $range = FormHelper.c('input', {
             type: "range",

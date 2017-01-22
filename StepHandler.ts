@@ -18,7 +18,7 @@ class StepHandler {
         switch (method) {
             case LoadMethod.GET:
                 throw new Error("Not implemented yet");
-            //TODO: Make a GET request to the database
+            // TODO: Make a GET request to the database
             case LoadMethod.Local:
                 var steps = Encoder.DecodeSteps(params);
                 var filteredSteps = StepHandler.filterDynAddedSteps(steps);
@@ -60,9 +60,9 @@ class StepHandler {
      */
     static hasTag(step: Step, tag: StepTag): boolean {
         if (step.tags == undefined) {
-            return false
+            return false;
         };
-        return step.tags.indexOf(tag) != -1
+        return step.tags.indexOf(tag) != -1;
     }
 
     /**
@@ -123,33 +123,33 @@ class StepHandler {
      * @description Makes Wizard ready for the user
      */
     static Init() {
-        //Check for the wizard anchor
+        // Check for the wizard anchor
         try {
             var $wizard = $('div#wizard');
         } catch (error) {
             throw "Wizard anchor div not found: " + error;
         }
 
-        //Check if Steps are loaded
+        // Check if Steps are loaded
         if (StepHandler.Steps[0] === null) {
             StepHandler.loadSteps();
-            //TODO: loadSteps().then(success{StepQueue = Steps;};
+            // TODO: loadSteps().then(success{StepQueue = Steps;};
         }
 
-        //Initialize the first Step
+        // Initialize the first Step
         var $initStep = StepHandler.Steps[0].createElement();
         $wizard.append($initStep);
 
-        //Create and append the Navigation
+        // Create and append the Navigation
         $wizard.append(StepHandler.createNav());
 
-        //Create and prepend (append as first child) the Progress Bar
+        // Create and prepend (append as first child) the Progress Bar
         $wizard.prepend(StepHandler.createProgressBar());
 
-        //Register UI events
+        // Register UI events
         StepHandler.registerEvents();
 
-        //Run StepLogic once to hide the Back button on start
+        // Run StepLogic once to hide the Back button on start
         StepHandler.onStepChange();
     };
 
@@ -185,10 +185,10 @@ class StepHandler {
      * @memberOf StepHandler
      */
     static updateProgress() {
-        var current_step = StepHandler.getCurrentStep();
-        var percent = ((StepHandler.StepQueue.indexOf(current_step) + 1) / StepHandler.StepQueue.length) * 100;
-        var $progress_bar = $('#progress_bar');
-        $progress_bar.width(percent + "%");
+        var currentStep = StepHandler.getCurrentStep();
+        var percent = ((StepHandler.StepQueue.indexOf(currentStep) + 1) / StepHandler.StepQueue.length) * 100;
+        var $progressBar = $('#progress_bar');
+        $progressBar.width(percent + "%");
     }
 
     /**
@@ -203,11 +203,11 @@ class StepHandler {
             id: "progress"
         });
 
-        var $progress_bar = FormHelper.c('div', {
+        var $progressBar = FormHelper.c('div', {
             id: "progress_bar"
         });
 
-        return $progress.append($progress_bar);
+        return $progress.append($progressBar);
     }
 
     /**
@@ -220,7 +220,7 @@ class StepHandler {
         $('button#btn_next')
             .click(() => {
                 StepHandler.onNextClicked();
-                //onStepChange called in onStepComplete
+                // OnStepChange called in onStepComplete
             });
         $('button#btn_back')
             .click(() => {
@@ -237,11 +237,11 @@ class StepHandler {
      * @memberOf StepHandler
      */
     static onStepChange() {
-        //Update the Progress Bar
+        // Update the Progress Bar
         StepHandler.updateProgress();
-        //Update currentStepIndex
+        // Update currentStepIndex
         StepHandler.currentStepIndex = StepHandler.StepQueue.indexOf(StepHandler.getCurrentStep());
-        //Hide/show buttons
+        // Hide/show buttons
         if (StepHandler.getCurrentStep()
             .id == "start") {
             $('#btn_back')
@@ -271,25 +271,24 @@ class StepHandler {
     static onBackClicked() {
         var step = StepHandler.getCurrentStep();
 
-        //remove previous Step's data from StepData
+        // Remove previous Step's data from StepData
         StepHandler.StepData.pop();
 
-        //Move to previous Step
+        // Move to previous Step
         var prevStep = StepHandler.StepQueue[StepHandler.currentStepIndex - 1];
         var $currentStep = step.getElement();
-        var $currentForm = step.getFormElement();
         $currentStep.attr('id', prevStep.id);
         $currentStep.empty();
         $currentStep.append(prevStep.form.createElement());
 
-        //Remove Dynamically Added Steps ahead if the previous step is Dynamic
+        // Remove Dynamically Added Steps ahead if the previous step is Dynamic
         if (StepHandler.hasTag(prevStep, StepTag.Dynamic)) {
             try {
                 StepHandler.RemoveDynAddStepsAhead(StepHandler.currentStepIndex - 1);
 
             } catch (TypeError) {
                 console.log("There are no dynsteps ahead.");
-                //TODO: Fix this error
+                // TODO: Fix this error
                 return;
             }
         }
@@ -308,9 +307,9 @@ class StepHandler {
     static onNextClicked() {
         var $next = $('button#btn_next');
 
-        //No need to verify data since there will always be default data
+        // No need to verify data since there will always be default data
 
-        //Confirm functionality
+        // Confirm functionality
         if (StepHandler.readyForNext) {
             $next.text('Next >');
             StepHandler.readyForNext = false;
@@ -328,24 +327,23 @@ class StepHandler {
     static onStepComplete() {
         var step = StepHandler.getCurrentStep();
 
-        //Extract and store the Step data
+        // Extract and store the Step data
         StepHandler.StepData.push(step.getData());
 
-        //Execute Logic corresponding to the Step
+        // Execute Logic corresponding to the Step
         StepHandler.StepLogic(step);
 
         // Take the first Step and put to the end of the Queue
-        //StepHandler.StepQueue.push(StepHandler.StepQueue.shift());
+        // StepHandler.StepQueue.push(StepHandler.StepQueue.shift());
 
-        //Move to next step
+        // Move to next step
         var nextStep = StepHandler.StepQueue[StepHandler.currentStepIndex + 1];
         var $currentStep = step.getElement();
-        var $currentForm = step.getFormElement();
         $currentStep.attr('id', nextStep.id);
         $currentStep.empty();
         $currentStep.append(nextStep.form.createElement());
 
-        //Next event is complex, calling the onStepChange here
+        // Next event is complex, calling the onStepChange here
         StepHandler.onStepChange();
     }
 
@@ -358,17 +356,17 @@ class StepHandler {
      * @memberOf StepHandler
      */
     static StepLogic(step: Step) {
-        //Store the current Step's data in a var for easier access
+        // Store the current Step's data in a var for easier access
         var stepData: IStepData = StepHandler.StepData[StepHandler.StepData.length - 1];
         switch (step.id) {
             case "use":
                 var use = stepData.data['select'];
                 switch (use) {
-                    //By default, add all DynamicallyAdded Steps whose name contains the Selected name
+                    // By default, add all DynamicallyAdded Steps whose name contains the Selected name
                     default:
                         var usesteps = StepHandler.getStepsByIDContains(use);
-                        usesteps.forEach((step) => {
-                            StepHandler.insertStep(step);
+                        usesteps.forEach((usestep) => {
+                            StepHandler.insertStep(usestep);
                         });
                         break;
                 }
@@ -402,19 +400,19 @@ class StepHandler {
      * @memberOf StepHandler
      */
     static RemoveDynAddStepsAhead(index: number = StepHandler.currentStepIndex) {
-        //Get Steps ahead of the current Step
+        // Get Steps ahead of the current Step
         var ahead = StepHandler.StepQueue.slice(StepHandler.currentStepIndex);
 
-        //Find DynamicallyAdded Steps in the sliced array
+        // Find DynamicallyAdded Steps in the sliced array
         var dynadded = ahead.filter((el) => {
             return StepHandler.hasTag(el, StepTag.DynamicallyAdded);
         });
 
-        //Remove these Steps from the StepQueue
+        // Remove these Steps from the StepQueue
         dynadded.forEach((dynaddstep) => {
-            var index = StepHandler.StepQueue.indexOf(dynaddstep);
-            if (index > -1) {
-                StepHandler.StepQueue.splice(index, 1);
+            var dynaddstepindex = StepHandler.StepQueue.indexOf(dynaddstep);
+            if (dynaddstepindex > -1) {
+                StepHandler.StepQueue.splice(dynaddstepindex, 1);
             }
         });
     }
@@ -428,12 +426,12 @@ class StepHandler {
      */
     static onFinish() {
 
-        //Finalize the Array with the Finish StepData
+        // Finalize the Array with the Finish StepData
         var finishdata = StepHandler.getCurrentStep()
             .getData();
         StepHandler.StepData.push(finishdata);
 
-        //Submit the Data to the BE
+        // Submit the Data to the BE
         StepHandler.submitData();
     }
 
@@ -455,9 +453,9 @@ class StepHandler {
             dataType: "json",
         })
             .then((success) => {
-                //do something
+                // Do something
             }, (failure) => {
-                //we failed, oh noes
+                // We failed, oh noes
             });
     }
 }

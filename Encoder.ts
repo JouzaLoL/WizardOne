@@ -17,17 +17,18 @@ class Encoder {
      */
     static EncodeSteps(steps: Step[]): string {
         var readySteps: Step[] = new Array();
-        //Dirty error fix
-        var steps: Step[] = new Array().concat(steps);
+        // Dirty error fix
+        var steps: Step[] = new Array().concat(steps); // tslint:disable-line
+
         steps.forEach(step => {
-            //Add information about Form Class
+            // Add information about Form Class
             var formclass = Encoder.getFormClass(step);
             step['FormClass'] = formclass;
-            //Add the ready Step to be encoded
+            // Add the ready Step to be encoded
             readySteps.push(step);
         });
 
-        //Encode and return the Steps
+        // Encode and return the Steps
         return JSON.stringify(readySteps);
     }
 
@@ -48,13 +49,13 @@ class Encoder {
         objs.forEach(obj => {
             var type = obj['FormClass'];
 
-            //Decode the Form
+            // Decode the Form
             var outform;
             var objform = obj['form'];
             switch (type) {
                 case "Select":
                     var options: FormOption[] = [];
-                    //Decode FormOptions
+                    // Decode FormOptions
                     objform.options.forEach(option => {
                         options.push(new FormOption(option.text, option.value));
                     });
@@ -76,22 +77,22 @@ class Encoder {
 
             }
 
-            //Reconstruct the Step's Tags
+            // Reconstruct the Step's Tags
             var recontags: StepTag[] = [];
             var objtags = obj['tags'];
-            
+
             if (objtags != undefined) {
                 objtags.forEach(tagnumber => {
-                    //Get String of the Enum by index
+                    // Get String of the Enum by index
                     var tagstring: string = StepTag[tagnumber];
-                    //Get the Enum by string
+                    // Get the Enum by string
                     var tagenum: StepTag = StepTag[tagstring];
-                    //Add it to the Array
+                    // Add it to the Array
                     recontags.push(tagenum);
                 });
             }
 
-            //Add the finished Step to the array
+            // Add the finished Step to the array
             steps.push(new Step(obj['id'], outform, recontags));
         });
 
