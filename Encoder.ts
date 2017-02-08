@@ -81,10 +81,8 @@ class Encoder {
                     break;
 
                 case "Finish":
-                    outform = new Information(objform.title, objform.text);
+                    outform = new Finish(objform.title, objform.text);
                     break;
-
-
             }
 
             // Reconstruct the Step's Tags

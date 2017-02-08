@@ -36,7 +36,7 @@ steps = [
         new Radio("Velikost", "Jak velké potřebujete auto?",
             [new RadioOption("Stačí nějaké menší", "mensi"), new RadioOption("Velké", "velke")])),
     new Step("sport",
-        new Radio("Sportovn9 jízda", "Chcete auto spíše pro sportovní jízdu?",
+        new Radio("Sportovní jízda", "Chcete auto spíše pro sportovní jízdu?",
             [new RadioOption("Ano", "ano"), new RadioOption("Ne", "ne")])),
     new Step("rozpocet",
         new Radio("Rozpočet", "Jaký je váš rozpočet na auto?",

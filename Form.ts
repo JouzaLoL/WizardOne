@@ -22,8 +22,8 @@ class Select implements IForm {
         });
         this.options.forEach(el => {
             FormHelper.c("option", {
-                value: el.value
-            })
+                    value: el.value
+                })
                 .text(el.text)
                 .appendTo($select);
         });
@@ -56,9 +56,9 @@ class Checkbox implements IForm {
         var $element = FormHelper.createForm(this.title, this.text);
 
         var $check = FormHelper.c('input', {
-            name: 'checkbox',
-            type: 'checkbox'
-        })
+                name: 'checkbox',
+                type: 'checkbox'
+            })
             .prop('checked', this.checked);
         $element.append($check);
 
@@ -80,10 +80,11 @@ class Radio implements IForm {
 
         this.options.forEach(el => {
             FormHelper.c("input", {
-                type: "radio",
-                name: "select",
-                value: el.value
-            })
+                    type: "radio",
+                    name: "select",
+                    value: el.value
+                })
+                .prop("checked", this.options[0] === el) // Check the first radio by default
                 .appendTo($element)
                 .after($(document.createTextNode(el.text)));
         });
@@ -163,9 +164,9 @@ class Finish implements IForm {
 
         var $element = FormHelper.createForm(this.title, this.text);
         var $finishbutton = FormHelper.c("button", {
-            type: "button",
-            id: "btn_finish"
-        })
+                type: "button",
+                id: "btn_finish"
+            })
             .text("Dokončit");
         $element.append($finishbutton);
 
@@ -185,7 +186,7 @@ class FormHelper {
      * @param {Object} attributes Attributes of the element. Format: { attribute: "value" }
      * @returns {JQuery}
      */
-    static c(element: string, attributes?: Object): JQuery {
+    static c(element: string, attributes ? : Object): JQuery {
         var e = $(document.createElement(element));
         if (attributes) {
             e.attr(attributes);
@@ -207,12 +208,12 @@ class FormHelper {
         var $element = FormHelper.c('form');
 
         var $title = FormHelper.c('div', {
-            id: 'title'
-        })
+                id: 'title'
+            })
             .text(title);
         var $text = FormHelper.c('div', {
-            id: 'text'
-        })
+                id: 'text'
+            })
             .text(text);
         $element.append($title)
             .append($text);
