@@ -22,8 +22,10 @@ class Select implements IForm {
         });
         this.options.forEach(el => {
             FormHelper.c("option", {
-                value: el.value
-            }).text(el.text).appendTo($select);
+                    value: el.value
+                })
+                .text(el.text)
+                .appendTo($select);
         });
         $element.append($select);
 
@@ -54,9 +56,10 @@ class Checkbox implements IForm {
         var $element = FormHelper.createForm(this.title, this.text);
 
         var $check = FormHelper.c('input', {
-            name: 'checkbox',
-            type: 'checkbox'
-        }).prop('checked', this.checked);
+                name: 'checkbox',
+                type: 'checkbox'
+            })
+            .prop('checked', this.checked);
         $element.append($check);
 
         return $element;
@@ -65,6 +68,42 @@ class Checkbox implements IForm {
         this.title = title;
         this.text = text;
         this.checked = checked;
+    }
+}
+
+class Radio implements IForm {
+    title: string;
+    text: string;
+    options: RadioOption[];
+    createElement(): JQuery {
+        var $element = FormHelper.createForm(this.title, this.text);
+
+        this.options.forEach(el => {
+            FormHelper.c("input", {
+                    type: "radio",
+                    name: "select",
+                    value: el.value
+                })
+                .append(el.text)
+                .appendTo($element);
+        });
+
+
+        return $element;
+    }
+    constructor(title: string, text: string, options: RadioOption[]) {
+        this.title = title;
+        this.text = text;
+        this.options = options;
+    }
+}
+
+class RadioOption {
+    text: string;
+    value: string;
+    constructor(text: string, value: string) {
+        this.text = text;
+        this.value = value;
     }
 }
 
@@ -126,7 +165,7 @@ class FormHelper {
      * @param {Object} attributes Attributes of the element. Format: { attribute: "value" }
      * @returns {JQuery}
      */
-    static c(element: string, attributes?: Object): JQuery {
+    static c(element: string, attributes ? : Object): JQuery {
         var e = $(document.createElement(element));
         if (attributes) {
             e.attr(attributes);
@@ -136,24 +175,27 @@ class FormHelper {
 
     /**
      * Creates a basic Form with Title and Text and returns it as a JQuery object
-     * 
+     *
      * @static
      * @param {string} title
      * @param {string} text
      * @returns {JQuery}
-     * 
+     *
      * @memberOf FormHelper
      */
     static createForm(title: string, text: string): JQuery {
         var $element = FormHelper.c('form');
 
         var $title = FormHelper.c('div', {
-            id: 'title'
-        }).text(title);
+                id: 'title'
+            })
+            .text(title);
         var $text = FormHelper.c('div', {
-            id: 'text'
-        }).text(text);
-        $element.append($title).append($text);
+                id: 'text'
+            })
+            .text(text);
+        $element.append($title)
+            .append($text);
 
         return $element;
     }
