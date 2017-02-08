@@ -356,6 +356,10 @@ class StepHandler {
             StepHandler.onBackClicked();
             StepHandler.onStepChange();
         });
+        $('button#btn_finish')
+            .click(() => {
+            StepHandler.onFinish();
+        });
     }
     /**
      * Fires on Step change (Back or Next)
@@ -684,6 +688,23 @@ class FormRange {
         this.defaultValue = defaultValue;
     }
 }
+class Finish {
+    createElement() {
+        var $element = FormHelper.createForm(this.title, this.text);
+        var $finishbutton = FormHelper.c("button", {
+            type: "button",
+            id: "btn_finish"
+        })
+            .text("Dokončit");
+        $element.append($finishbutton);
+        return $element;
+    }
+    ;
+    constructor(title, text) {
+        this.title = title;
+        this.text = text;
+    }
+}
 class FormHelper {
     /**
      * A wrapper for the jQuery element creation.
@@ -744,7 +765,7 @@ steps = [
     new Step("velikost", new Radio("Velikost", "Jak velké potřebujete auto?", [new RadioOption("Stačí nějaké menší", "mensi"), new RadioOption("Velké", "velke")])),
     new Step("sport", new Radio("Sportovn9 jízda", "Chcete auto spíše pro sportovní jízdu?", [new RadioOption("Ano", "ano"), new RadioOption("Ne", "ne")])),
     new Step("rozpocet", new Radio("Rozpočet", "Jaký je váš rozpočet na auto?", [new RadioOption("Do 100 tisíc Kč", "<100k"), new RadioOption("Do 250 tisíc Kč", "<250k")])),
-    new Step("finish", new Information("Závěr", "Vaše výsledky jsou připraveny"))
+    new Step("finish", new Finish("Závěr", "Vaše výsledky jsou připraveny"))
 ];
 var encoded = Encoder.EncodeSteps(steps);
 StepHandler.loadSteps(LoadMethod.Local, encoded);

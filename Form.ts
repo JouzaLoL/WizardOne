@@ -157,6 +157,27 @@ class FormRange implements IForm {
     }
 }
 
+class Finish implements IForm {
+    title: string;
+    text: string;
+    createElement(): JQuery {
+
+        var $element = FormHelper.createForm(this.title, this.text);
+        var $finishbutton = FormHelper.c("button", {
+                type: "button",
+                id: "btn_finish"
+            })
+            .text("Dokončit");
+        $element.append($finishbutton);
+
+        return $element;
+    };
+    constructor(title: string, text: string) {
+        this.title = title;
+        this.text = text;
+    }
+}
+
 class FormHelper {
     /**
      * A wrapper for the jQuery element creation.

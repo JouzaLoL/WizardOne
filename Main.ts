@@ -42,7 +42,7 @@ steps = [
         new Radio("Rozpočet", "Jaký je váš rozpočet na auto?",
             [new RadioOption("Do 100 tisíc Kč", "<100k"), new RadioOption("Do 250 tisíc Kč", "<250k")])),
     new Step("finish",
-        new Information("Závěr", "Vaše výsledky jsou připraveny"))
+        new Finish("Závěr", "Vaše výsledky jsou připraveny"))
 ];
 
 

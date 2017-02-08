@@ -227,6 +227,10 @@ class StepHandler {
                 StepHandler.onBackClicked();
                 StepHandler.onStepChange();
             });
+        $('button#btn_finish')
+            .click(() => {
+                StepHandler.onFinish();
+            });
     }
 
     /**
