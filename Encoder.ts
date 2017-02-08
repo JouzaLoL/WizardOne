@@ -1,24 +1,25 @@
 /**
  * Responsible for
  * * Encoding and decoding Steps
- * 
+ *
  * @class Encoder
  */
 class Encoder {
 
     /**
      * Encodes the Steps provided for exchange between front and back-end
-     * 
+     *
      * @static
      * @param {Step[]} steps The Steps to be encoded
      * @returns {string} A JSON-string containing the Steps encoded in Format
-     * 
+     *
      * @memberOf Encoder
      */
     static EncodeSteps(steps: Step[]): string {
         var readySteps: Step[] = new Array();
         // Dirty error fix
-        var steps: Step[] = new Array().concat(steps); // tslint:disable-line
+        var steps: Step[] = new Array() // tslint:disable-line
+            .concat(steps);
 
         steps.forEach(step => {
             // Add information about Form Class
@@ -35,11 +36,11 @@ class Encoder {
 
     /**
      * Decodes the JSON-string into Step objects
-     * 
+     *
      * @static
      * @param {string} json
      * @returns {Step[]}
-     * 
+     *
      * @memberOf Encoder
      */
     static DecodeSteps(json: string): Step[] {
@@ -75,6 +76,13 @@ class Encoder {
                     outform = new FormRange(objform.title, objform.text, objform.min, objform.max, objform.step, objform.defaultValue);
                     break;
 
+                case "Radio":
+                    outform = new Radio(objform.title, objform.text, objform.options);
+                    break;
+
+                case "Finish":
+                    outform = new Finish(objform.title, objform.text);
+                    break;
             }
 
             // Reconstruct the Step's Tags
@@ -102,6 +110,4 @@ class Encoder {
     private static getFormClass(step: Step) {
         return step.form.constructor.name;
     }
-
-
 }
