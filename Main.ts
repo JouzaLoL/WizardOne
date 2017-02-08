@@ -1,4 +1,5 @@
 /// <reference path="StepHandler.ts" />
+
 // Manually load the steps for now
 var TestSteps: Step[] = [];
 TestSteps.push(
@@ -44,7 +45,6 @@ steps = [
     new Step("finish",
         new Finish("Závěr", "Vaše výsledky jsou připraveny"))
 ];
-
 
 var encoded = Encoder.EncodeSteps(steps);
 StepHandler.loadSteps(LoadMethod.Local, encoded);
