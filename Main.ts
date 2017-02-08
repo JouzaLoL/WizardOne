@@ -31,7 +31,7 @@ steps = [
         new Information("Vítejte", "Vítejte v systému Wizard")),
     new Step("km",
         new Radio("Kilometry", "Kolik denně najezdíte km?",
-            [new RadioOption("Méně než 50 km", "<50km"), new RadioOption("Více než 50 km", ">50km")])),
+            [new RadioOption("Méně než 50 km", "pod50km"), new RadioOption("Více než 50 km", "nad50km")])),
     new Step("velikost",
         new Radio("Velikost", "Jak velké potřebujete auto?",
             [new RadioOption("Stačí nějaké menší", "mensi"), new RadioOption("Velké", "velke")])),
@@ -40,7 +40,7 @@ steps = [
             [new RadioOption("Ano", "ano"), new RadioOption("Ne", "ne")])),
     new Step("rozpocet",
         new Radio("Rozpočet", "Jaký je váš rozpočet na auto?",
-            [new RadioOption("Do 100 tisíc Kč", "<100k"), new RadioOption("Do 250 tisíc Kč", "<250k")])),
+            [new RadioOption("Do 100 tisíc Kč", "pod100k"), new RadioOption("Do 250 tisíc Kč", "nad250k")])),
     new Step("finish",
         new Finish("Závěr", "Vaše výsledky jsou připraveny"))
 ];

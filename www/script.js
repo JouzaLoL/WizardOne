@@ -17,7 +17,8 @@ class Encoder {
     static EncodeSteps(steps) {
         var readySteps = new Array();
         // Dirty error fix
-        var steps = new Array().concat(steps); // tslint:disable-line
+        var steps = new Array() // tslint:disable-line
+            .concat(steps);
         steps.forEach(step => {
             // Add information about Form Class
             var formclass = Encoder.getFormClass(step);
@@ -62,6 +63,12 @@ class Encoder {
                     break;
                 case "FormRange":
                     outform = new FormRange(objform.title, objform.text, objform.min, objform.max, objform.step, objform.defaultValue);
+                    break;
+                case "Radio":
+                    outform = new Radio(objform.title, objform.text, objform.options);
+                    break;
+                case "Finish":
+                    outform = new Information(objform.title, objform.text);
                     break;
             }
             // Reconstruct the Step's Tags
@@ -112,7 +119,7 @@ class Step {
      *
      * @returns {Object} The JS object containing the form data
      *
-     * @memberOf Step
+     * @memberof Step
      */
     getData() {
         var a = this.getFormElement().serializeArray();
@@ -634,8 +641,8 @@ class Radio {
                 name: "select",
                 value: el.value
             })
-                .append(el.text)
-                .appendTo($element);
+                .appendTo($element)
+                .after($(document.createTextNode(el.text)));
         });
         return $element;
     }
@@ -761,10 +768,10 @@ TestSteps.push(new Step("finish", new Information("Finished", "We are finished")
 var steps = [];
 steps = [
     new Step("start", new Information("Vítejte", "Vítejte v systému Wizard")),
-    new Step("km", new Radio("Kilometry", "Kolik denně najezdíte km?", [new RadioOption("Méně než 50 km", "<50km"), new RadioOption("Více než 50 km", ">50km")])),
+    new Step("km", new Radio("Kilometry", "Kolik denně najezdíte km?", [new RadioOption("Méně než 50 km", "pod50km"), new RadioOption("Více než 50 km", "nad50km")])),
     new Step("velikost", new Radio("Velikost", "Jak velké potřebujete auto?", [new RadioOption("Stačí nějaké menší", "mensi"), new RadioOption("Velké", "velke")])),
     new Step("sport", new Radio("Sportovn9 jízda", "Chcete auto spíše pro sportovní jízdu?", [new RadioOption("Ano", "ano"), new RadioOption("Ne", "ne")])),
-    new Step("rozpocet", new Radio("Rozpočet", "Jaký je váš rozpočet na auto?", [new RadioOption("Do 100 tisíc Kč", "<100k"), new RadioOption("Do 250 tisíc Kč", "<250k")])),
+    new Step("rozpocet", new Radio("Rozpočet", "Jaký je váš rozpočet na auto?", [new RadioOption("Do 100 tisíc Kč", "pod100k"), new RadioOption("Do 250 tisíc Kč", "nad250k")])),
     new Step("finish", new Finish("Závěr", "Vaše výsledky jsou připraveny"))
 ];
 var encoded = Encoder.EncodeSteps(steps);

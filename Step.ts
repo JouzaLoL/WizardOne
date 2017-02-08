@@ -24,10 +24,10 @@ class Step {
     }
     /**
      * Serializes the form data into a JS object
-     * 
+     *
      * @returns {Object} The JS object containing the form data
-     * 
-     * @memberOf Step
+     *
+     * @memberof Step
      */
     getData(): IStepData {
         var a = this.getFormElement().serializeArray();
