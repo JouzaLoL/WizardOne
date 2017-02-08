@@ -35,11 +35,11 @@ class StepHandler {
 
     /**
      * Filter out Steps with the DynamicallyAdded tag
-     * 
+     *
      * @static
      * @param {Step[]} steps
      * @returns {Step[]}
-     * 
+     *
      * @memberOf StepHandler
      */
     static filterDynAddedSteps(steps: Step[]): Step[] {
@@ -50,12 +50,12 @@ class StepHandler {
 
     /**
      * Checks if a Step has the Tag specified
-     * 
+     *
      * @static
      * @param {Step} step
      * @param {StepTag} tag
      * @returns {boolean}
-     * 
+     *
      * @memberOf StepHandler
      */
     static hasTag(step: Step, tag: StepTag): boolean {
@@ -67,8 +67,8 @@ class StepHandler {
 
     /**
      * Return a Step with the specified ID
-     * 
-     * @param {string} id 
+     *
+     * @param {string} id
      * @returns {Step} If not found, will return null
      */
     static getStep(id: string, queue?: boolean): Step {
@@ -82,12 +82,12 @@ class StepHandler {
 
     /**
      * Get all Steps whose ID contains the specified string
-     * 
+     *
      * @static
      * @param {string} id
      * @param {boolean} [queue=false]
      * @returns {Step[]}
-     * 
+     *
      * @memberOf StepHandler
      */
     static getStepsByIDContains(id: string, fromqueue: boolean = false): Step[] {
@@ -104,7 +104,7 @@ class StepHandler {
 
     /**
      * Get the Step which is currently in the DOM.
-     * 
+     *
      * @returns {Step}
      */
     static getCurrentStep(): Step {
@@ -119,7 +119,7 @@ class StepHandler {
 
     /**
      * First fn to be called on document.load
-     * 
+     *
      * @description Makes Wizard ready for the user
      */
     static Init() {
@@ -155,7 +155,7 @@ class StepHandler {
 
     /**
      * Creates the Next and Reset buttons
-     * 
+     *
      * @returns {JQuery} a JQuery element containing the Next and Reset buttons
      */
     static createNav(): JQuery {
@@ -178,10 +178,10 @@ class StepHandler {
 
     /**
      * Update the Progress Bar according to the current state
-     * 
+     *
      * @static
      * @param {number} percent
-     * 
+     *
      * @memberOf StepHandler
      */
     static updateProgress() {
@@ -193,9 +193,9 @@ class StepHandler {
 
     /**
      * Creates the Progress Bar as jQuery element
-     * 
+     *
      * @static
-     * 
+     *
      * @memberOf StepHandler
      */
     static createProgressBar(): JQuery {
@@ -212,8 +212,8 @@ class StepHandler {
 
     /**
      * Register the events for the page
-     * 
-     * 
+     *
+     *
      * @memberOf StepHandler
      */
     static registerEvents() {
@@ -233,7 +233,7 @@ class StepHandler {
      * Fires on Step change (Back or Next)
      * Contains functionality common for all Step changes
      * @static
-     * 
+     *
      * @memberOf StepHandler
      */
     static onStepChange() {
@@ -263,9 +263,9 @@ class StepHandler {
     /**
      * Fired when the User clicks the Back button
      * Moves the User back one Step
-     * 
+     *
      * @static
-     * 
+     *
      * @memberOf StepHandler
      */
     static onBackClicked() {
@@ -298,10 +298,10 @@ class StepHandler {
 
     /**
      * Fired when the User clicks the Next button
-     * 
+     *
      * @static
      * @returns
-     * 
+     *
      * @memberOf StepHandler
      */
     static onNextClicked() {
@@ -349,10 +349,10 @@ class StepHandler {
 
     /**
      * Handles individual Step logic
-     * 
+     *
      * @param {string} step
      * @static
-     * 
+     *
      * @memberOf StepHandler
      */
     static StepLogic(step: Step) {
@@ -384,7 +384,7 @@ class StepHandler {
      * @static
      * @param {number} index
      * @param {Step} step
-     * 
+     *
      * @memberOf StepHandler
      */
     static insertStep(step: Step, index: number = StepHandler.currentStepIndex + 1) {
@@ -393,10 +393,10 @@ class StepHandler {
 
     /**
      * Removes Dynamically Added Steps ahead of the specified index or, if not specified, the current Step
-     * 
+     *
      * @static
      * @param {number} index The index to start at
-     * 
+     *
      * @memberOf StepHandler
      */
     static RemoveDynAddStepsAhead(index: number = StepHandler.currentStepIndex) {
@@ -419,9 +419,9 @@ class StepHandler {
 
     /**
      * Called by the Finish button
-     * 
+     *
      * @static
-     * 
+     *
      * @memberOf StepHandler
      */
     static onFinish() {
@@ -437,9 +437,9 @@ class StepHandler {
 
     /**
      * Submits the data to the backend
-     * 
+     *
      * @static
-     * 
+     *
      * @memberOf StepHandler
      */
     static submitData() {
