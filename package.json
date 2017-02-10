@@ -1,7 +1,7 @@
 {
-  "name": "wizardone_men",
+  "name": "wizardone",
   "version": "1.0.0",
-  "description": "A Mongo/Express/Node implementation of Wizard",
+  "description": "One implementation of Wizard",
   "main": "main.js",
   "dependencies": {
     "serializer.ts": "0.0.12"
@@ -10,7 +10,10 @@
     "@types/jquery": "^2.0.34"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently --kill-others \"npm run live\" \"npm run tsc\"",
+    "live": "live-server &",
+    "tsc": "tsc --watch &"
   },
   "author": "Josef Vacek",
   "license": "MIT"
