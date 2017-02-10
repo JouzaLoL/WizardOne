@@ -32,20 +32,21 @@ steps = [
         new Information("Vítejte", "Vítejte v systému Wizard")),
     new Step("km",
         new Radio("Kilometry", "Kolik denně najezdíte km?",
-            [new RadioOption("Méně než 50 km", "pod50km"), new RadioOption("Více než 50 km", "nad50km")])),
+            [new RadioOption("Méně než 50 km", "1"), new RadioOption("Více než 50 km", "2")])),
     new Step("velikost",
         new Radio("Velikost", "Jak velké potřebujete auto?",
-            [new RadioOption("Stačí nějaké menší", "mensi"), new RadioOption("Velké", "velke")])),
+            [new RadioOption("Stačí nějaké menší", "1"), new RadioOption("Velké", "2")])),
     new Step("sport",
         new Radio("Sportovní jízda", "Chcete auto spíše pro sportovní jízdu?",
-            [new RadioOption("Ano", "ano"), new RadioOption("Ne", "ne")])),
+            [new RadioOption("Ano", "2"), new RadioOption("Ne", "1")])),
     new Step("rozpocet",
         new Radio("Rozpočet", "Jaký je váš rozpočet na auto?",
-            [new RadioOption("Do 100 tisíc Kč", "pod100k"), new RadioOption("Do 250 tisíc Kč", "nad250k")])),
+            [new RadioOption("Do 100 tisíc Kč", "1"), new RadioOption("Do 250 tisíc Kč", "2")])),
     new Step("finish",
         new Finish("Závěr", "Vaše výsledky jsou připraveny"))
 ];
 
+// Simulate exchange between server and client (simulate encoding)
 var encoded = Encoder.EncodeSteps(steps);
 StepHandler.loadSteps(LoadMethod.Local, encoded);
 

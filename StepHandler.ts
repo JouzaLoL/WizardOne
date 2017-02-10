@@ -166,11 +166,11 @@ class StepHandler {
         var $back = FormHelper.c("button", {
             id: "btn_back"
         })
-            .text("< Back");
+            .text("< Zpět");
         var $next = FormHelper.c("button", {
             id: "btn_next"
         })
-            .text("Next >");
+            .text("Dále >");
 
         return $nav.append($back)
             .append($next);
@@ -189,6 +189,7 @@ class StepHandler {
         var percent = ((StepHandler.StepQueue.indexOf(currentStep) + 1) / StepHandler.StepQueue.length) * 100;
         var $progressBar = $('#progress_bar');
         $progressBar.width(percent + "%");
+        $progressBar.text(Math.round(percent).toString() + "%");
     }
 
     /**
@@ -227,10 +228,6 @@ class StepHandler {
                 StepHandler.onBackClicked();
                 StepHandler.onStepChange();
             });
-        $('button#btn_finish')
-            .click(() => {
-                StepHandler.onFinish();
-            });
     }
 
     /**
@@ -258,6 +255,10 @@ class StepHandler {
             .id == "finish") {
             $('#btn_next')
                 .hide();
+            $('button#btn_finish')
+                .click(() => {
+                    StepHandler.onFinish();
+                });
         } else {
             $('#btn_next')
                 .show();
@@ -449,18 +450,32 @@ class StepHandler {
     static submitData() {
         var data = StepHandler.StepData;
 
-        $.ajax({
-            type: "POST",
-            url: "/api/default",
-            data: data,
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-        })
-            .then((success) => {
-                // Do something
-            }, (failure) => {
-                // We failed, oh noes
-            });
+        var encodedData = [];
+
+        data.forEach(element => {
+            if (element.id != "start") {
+                encodedData.push(element.data["select"]);
+            }
+        });
+
+        var result = Data.getModel(encodedData[0], encodedData[1], encodedData[2], encodedData[3]);
+
+        var resultelement = StepHandler.createResultForm(result).createElement();
+        StepHandler.getCurrentStep().getFormElement().replaceWith(resultelement);
+
+    }
+
+
+    /**
+     * Creates a Form element with the results
+     *
+     * @static
+     * @param {any} result
+     *
+     * @memberOf StepHandler
+     */
+    static createResultForm(result: Model): IForm {
+        return new Information("Vaše ideální auto je..", result.Name);
     }
 }
 

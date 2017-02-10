@@ -307,11 +307,11 @@ class StepHandler {
         var $back = FormHelper.c("button", {
             id: "btn_back"
         })
-            .text("< Back");
+            .text("< Zpět");
         var $next = FormHelper.c("button", {
             id: "btn_next"
         })
-            .text("Next >");
+            .text("Dále >");
         return $nav.append($back)
             .append($next);
     }
@@ -329,6 +329,7 @@ class StepHandler {
         var percent = ((StepHandler.StepQueue.indexOf(currentStep) + 1) / StepHandler.StepQueue.length) * 100;
         var $progressBar = $('#progress_bar');
         $progressBar.width(percent + "%");
+        $progressBar.text(Math.round(percent).toString() + "%");
     }
     /**
      * Creates the Progress Bar as jQuery element
@@ -363,10 +364,6 @@ class StepHandler {
             StepHandler.onBackClicked();
             StepHandler.onStepChange();
         });
-        $('button#btn_finish')
-            .click(() => {
-            StepHandler.onFinish();
-        });
     }
     /**
      * Fires on Step change (Back or Next)
@@ -394,6 +391,10 @@ class StepHandler {
             .id == "finish") {
             $('#btn_next')
                 .hide();
+            $('button#btn_finish')
+                .click(() => {
+                StepHandler.onFinish();
+            });
         }
         else {
             $('#btn_next')
@@ -561,18 +562,26 @@ class StepHandler {
      */
     static submitData() {
         var data = StepHandler.StepData;
-        $.ajax({
-            type: "POST",
-            url: "/api/default",
-            data: data,
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-        })
-            .then((success) => {
-            // Do something
-        }, (failure) => {
-            // We failed, oh noes
+        var encodedData = [];
+        data.forEach(element => {
+            if (element.id != "start") {
+                encodedData.push(element.data["select"]);
+            }
         });
+        var result = Data.getModel(encodedData[0], encodedData[1], encodedData[2], encodedData[3]);
+        var resultelement = StepHandler.createResultForm(result).createElement();
+        StepHandler.getCurrentStep().getFormElement().replaceWith(resultelement);
+    }
+    /**
+     * Creates a Form element with the results
+     *
+     * @static
+     * @param {any} result
+     *
+     * @memberOf StepHandler
+     */
+    static createResultForm(result) {
+        return new Information("Vaše ideální auto je..", result.Name);
     }
 }
 StepHandler.Steps = [];
@@ -769,13 +778,49 @@ TestSteps.push(new Step("finish", new Information("Finished", "We are finished")
 var steps = [];
 steps = [
     new Step("start", new Information("Vítejte", "Vítejte v systému Wizard")),
-    new Step("km", new Radio("Kilometry", "Kolik denně najezdíte km?", [new RadioOption("Méně než 50 km", "pod50km"), new RadioOption("Více než 50 km", "nad50km")])),
-    new Step("velikost", new Radio("Velikost", "Jak velké potřebujete auto?", [new RadioOption("Stačí nějaké menší", "mensi"), new RadioOption("Velké", "velke")])),
-    new Step("sport", new Radio("Sportovní jízda", "Chcete auto spíše pro sportovní jízdu?", [new RadioOption("Ano", "ano"), new RadioOption("Ne", "ne")])),
-    new Step("rozpocet", new Radio("Rozpočet", "Jaký je váš rozpočet na auto?", [new RadioOption("Do 100 tisíc Kč", "pod100k"), new RadioOption("Do 250 tisíc Kč", "nad250k")])),
+    new Step("km", new Radio("Kilometry", "Kolik denně najezdíte km?", [new RadioOption("Méně než 50 km", "1"), new RadioOption("Více než 50 km", "2")])),
+    new Step("velikost", new Radio("Velikost", "Jak velké potřebujete auto?", [new RadioOption("Stačí nějaké menší", "1"), new RadioOption("Velké", "2")])),
+    new Step("sport", new Radio("Sportovní jízda", "Chcete auto spíše pro sportovní jízdu?", [new RadioOption("Ano", "2"), new RadioOption("Ne", "1")])),
+    new Step("rozpocet", new Radio("Rozpočet", "Jaký je váš rozpočet na auto?", [new RadioOption("Do 100 tisíc Kč", "1"), new RadioOption("Do 250 tisíc Kč", "2")])),
     new Step("finish", new Finish("Závěr", "Vaše výsledky jsou připraveny"))
 ];
+// Simulate exchange between server and client (simulate encoding)
 var encoded = Encoder.EncodeSteps(steps);
 StepHandler.loadSteps(LoadMethod.Local, encoded);
 $(document)
     .ready(StepHandler.Init);
+// Purpose: Gets data and returns results
+class Model {
+    constructor(a, b, c, d, name) {
+        this.A = a;
+        this.B = b;
+        this.C = c;
+        this.D = d;
+        this.Name = name;
+    }
+}
+class Data {
+    static getModel(a, b, c, d) {
+        return this.Data.filter((model) => {
+            return model.A == a && model.B == b && model.C == c && model.D == d;
+        })[0];
+    }
+}
+Data.Data = [
+    new Model(1, 1, 1, 1, "Lancia Ypsilon 1.2i 2008"),
+    new Model(2, 1, 1, 1, "Fiat Punto 1.9 Mjet 2006"),
+    new Model(1, 1, 2, 1, "Toyota Celica 1.8 VVT-I 2002"),
+    new Model(2, 1, 2, 1, "Alfa Romeo GT 1.9 jtd 2005"),
+    new Model(1, 1, 1, 2, "Lancia Delta 1.4 T-JET 2010"),
+    new Model(1, 1, 1, 2, "VW Polo 1.6 Tdi 2011"),
+    new Model(1, 1, 2, 2, "Mazda MX-5 1.8i 2006"),
+    new Model(2, 1, 2, 2, "Alfa Romeo Brera 2.4 jtdm 2008"),
+    new Model(1, 2, 1, 1, "Ford Focus Combi 1.6i 2008"),
+    new Model(2, 2, 1, 1, "Fiat Croma 1.9 jtd 2007"),
+    new Model(1, 2, 2, 1, "Jaguar X-Type 2.5i 2002"),
+    new Model(2, 2, 2, 1, "Jaguar X-Type 2.5i 2003"),
+    new Model(1, 2, 1, 2, "Škoda Roomster 1.4i 2010"),
+    new Model(2, 2, 1, 2, "Ford S-Max 1.8 TDCi 2010"),
+    new Model(1, 2, 2, 2, "Lexus IS 250 2008"),
+    new Model(2, 2, 2, 2, "BMW 530d 2007")
+];
