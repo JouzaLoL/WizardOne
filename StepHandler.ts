@@ -30,7 +30,7 @@ class StepHandler {
         }
 
         return true;
-    };
+    }
 
 
     /**
@@ -61,7 +61,7 @@ class StepHandler {
     static hasTag(step: Step, tag: StepTag): boolean {
         if (step.tags == undefined) {
             return false;
-        };
+        }
         return step.tags.indexOf(tag) != -1;
     }
 
@@ -77,7 +77,7 @@ class StepHandler {
         } else {
             return StepHandler.Steps.filter((x: Step) => x.id === id)[0];
         }
-    };
+    }
 
 
     /**
@@ -115,7 +115,7 @@ class StepHandler {
             throw "No Step found in DOM at the moment; " + error;
         }
         return StepHandler.getStep(id, true);
-    };
+    }
 
     /**
      * First fn to be called on document.load
@@ -151,7 +151,7 @@ class StepHandler {
 
         // Run StepLogic once to hide the Back button on start
         StepHandler.onStepChange();
-    };
+    }
 
     /**
      * Creates the Next and Reset buttons
@@ -174,7 +174,7 @@ class StepHandler {
 
         return $nav.append($back)
             .append($next);
-    };
+    }
 
     /**
      * Update the Progress Bar according to the current state

@@ -63,7 +63,7 @@ class Checkbox implements IForm {
         $element.append($check);
 
         return $element;
-    };
+    }
     constructor(title: string, text: string, checked: boolean = false) {
         this.title = title;
         this.text = text;
@@ -115,7 +115,7 @@ class Information implements IForm {
         var $element = FormHelper.createForm(this.title, this.text);
 
         return $element;
-    };
+    }
     constructor(title: string, text: string) {
         this.title = title;
         this.text = text;
@@ -146,7 +146,7 @@ class FormRange implements IForm {
         $element.append($range);
 
         return $element;
-    };
+    }
     constructor(title: string, text: string, min: number = 0, max: number = 30000, step: number = 500, defaultValue: number = 20000) {
         this.title = title;
         this.text = text;
@@ -171,7 +171,7 @@ class Finish implements IForm {
         $element.append($finishbutton);
 
         return $element;
-    };
+    }
     constructor(title: string, text: string) {
         this.title = title;
         this.text = text;

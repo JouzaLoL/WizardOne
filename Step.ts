@@ -18,7 +18,7 @@ class Step {
     }
     getElement(): JQuery {
         return $('#' + this.id);
-    };
+    }
     getFormElement(): JQuery {
         return $('#' + this.id + ' > ' + 'form');
     }
@@ -51,7 +51,7 @@ class Step {
         return stepData;
 
 
-    };
+    }
     constructor(id: string, form: IForm, tags?: StepTag[]) {
         this.id = id;
         this.form = form;
